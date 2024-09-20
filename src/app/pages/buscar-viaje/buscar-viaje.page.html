@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Viajes disponibles</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list *ngIf="trips.length > 0; else noTrips">
+    <ion-item *ngFor="let trip of trips">
+      <ion-label>
+        <h2>{{ trip.driverName }} - {{ trip.destination }}</h2>
+        <p>Salida: {{ trip.departureTime }}</p>
+        <p>Asientos: {{ trip.availableSeats }}</p>
+        <p>Precio: ${{trip.price}}</p>
+      </ion-label>
+      <ion-button (click)="unirseAlViaje()" fill="solid" class="ion-padding">
+        Unirse
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <!-- Si no hay viajes -->
+  <ng-template #noTrips>
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>No hay viajes disponibles</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        No hay viajes disponible. Por favor revisa más tarde.
+      </ion-card-content>
+    </ion-card>
+  </ng-template>
+</ion-content>

@@ -1,0 +1,39 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Crear Viaje</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form (ngSubmit)="createTrip()" #tripForm="ngForm">
+    <ion-item>
+      <ion-input labelPlacement="floating" label="Lugar inicio" [(ngModel)]="trip.startLocation" name="startLocation"
+        type="text" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input labelPlacement="floating" label="Destino" [(ngModel)]="trip.destination" name="destination" type="text"
+        required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input labelPlacement="floating" label="Asientos disponibles" [(ngModel)]="trip.availableSeats"
+        name="availableSeats" type="number" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-input labelPlacement="floating" label="Tarifa" [(ngModel)]="trip.price" name="price" type="number"
+        required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-datetime presentation="date-time" [preferWheel]="true" size="cover" [(ngModel)]="trip.departureTime" name="departureTime">
+        <span slot="title">Fecha y hora</span>
+      </ion-datetime>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" color="primary" class="ion-padding" [disabled]="!tripForm.form.valid">
+      Crear Viaje
+    </ion-button>
+  </form>
+</ion-content>
