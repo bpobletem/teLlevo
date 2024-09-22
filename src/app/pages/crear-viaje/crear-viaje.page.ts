@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
   templateUrl: './crear-viaje.page.html',
   styleUrls: ['./crear-viaje.page.scss'],
 })
-export class CrearViajePage implements OnInit {
+export class CrearViajePage  {
 
   trip = {
     startLocation: '',
@@ -20,9 +20,6 @@ export class CrearViajePage implements OnInit {
 
   createTrip() {
     console.log('Trip created:', this.trip);
-  }
-
-  ngOnInit() {
   }
 
 }

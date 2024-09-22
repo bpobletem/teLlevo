@@ -1,8 +1,4 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Crear Cuenta</ion-title>
-  </ion-toolbar>
-</ion-header>
+<app-encabezado titulo="Crear Usuario"></app-encabezado>
 
 <ion-content>
   <form [formGroup]="registrarForm" (ngSubmit)="onSubmit()">
@@ -30,7 +26,7 @@
       La contraseña debe tener al menos 6 caracteres.
     </ion-text>
 
-    <ion-button expand="full" type="submit" [disabled]="registrarForm?.invalid">Crear Cuenta</ion-button>
+    <ion-button expand="full" type="submit" [disabled]="registrarForm.invalid">Crear Cuenta</ion-button>
   </form>
 
   <ion-text color="danger" *ngIf="errorMessage">{{ errorMessage }}</ion-text>

@@ -1,0 +1,9 @@
+<ion-header>
+  <ion-toolbar>
+    <!-- <ion-buttons slot="start">
+      <ion-back-button defaultHref="home" text="Volver" mode="ios"></ion-back-button>
+    </ion-buttons> -->
+    <ion-title class="ion-text-capitalize">{{titulo}}</ion-title>
+    <ion-icon *ngIf="isLoggedIn" slot="end" name="person" class="ion-padding" size="large" color="primary" (click)="goToProfile()"></ion-icon>
+  </ion-toolbar>
+</ion-header>

@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
 
-import { CrearViajePageRoutingModule } from './crear-viaje-routing.module';
+import { PerfilPageRoutingModule } from './perfil-routing.module';
 
-import { CrearViajePage } from './crear-viaje.page';
+import { PerfilPage } from './perfil.page';
 import { ComponentsModule } from "../../components/components.module";
 
 @NgModule({
@@ -14,9 +14,9 @@ import { ComponentsModule } from "../../components/components.module";
     CommonModule,
     FormsModule,
     IonicModule,
-    CrearViajePageRoutingModule,
+    PerfilPageRoutingModule,
     ComponentsModule
 ],
-  declarations: [CrearViajePage]
+  declarations: [PerfilPage]
 })
-export class CrearViajePageModule {}
+export class PerfilPageModule {}

@@ -1,0 +1,47 @@
+<app-encabezado titulo="Perfil"></app-encabezado>
+
+<ion-content>
+  <ion-content>
+    <ion-item>
+      <ion-label position="floating">Nombre</ion-label>
+      <ion-input [(ngModel)]="user.nombre" ></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">Apellido</ion-label>
+      <ion-input [(ngModel)]="user.apellido" ></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">RUT</ion-label>
+      <ion-input [(ngModel)]="user.rut" ></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">Dirección</ion-label>
+      <ion-input [(ngModel)]="user.direccion" ></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">Comuna</ion-label>
+      <ion-input [(ngModel)]="user.comuna" ></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">Modelo de Auto</ion-label>
+      <ion-input [(ngModel)]="user.modeloAuto" ></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">Color de Auto</ion-label>
+      <ion-input [(ngModel)]="user.colorAuto" ></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">Patente del Auto</ion-label>
+      <ion-input [(ngModel)]="user.patenteAuto" ></ion-input>
+    </ion-item>
+  
+    <ion-button expand="block" (click)="guardar()">Guardar Cambios</ion-button>
+  </ion-content>
+</ion-content>

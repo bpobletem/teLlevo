@@ -22,9 +22,14 @@ const routes: Routes = [
   {
     path: 'crear-usuario',
     loadChildren: () => import('./pages/crear-usuario/crear-usuario.module').then( m => m.CrearUsuarioPageModule)
-  },  {
+  },
+  {
     path: 'iniciar-sesion',
     loadChildren: () => import('./pages/iniciar-sesion/iniciar-sesion.module').then( m => m.IniciarSesionPageModule)
+  },
+  {
+    path: 'perfil',
+    loadChildren: () => import('./pages/perfil/perfil.module').then( m => m.PerfilPageModule)
   },
 
 ];
