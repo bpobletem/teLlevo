@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Crear Cuenta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="registrarForm" (ngSubmit)="onSubmit()">
+    <ion-item>
+      <ion-label position="floating">Nombre</ion-label>
+      <ion-input formControlName="username"></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="registrarForm.get('username')?.invalid && registrarForm.get('username')?.touched">
+      El nombre es requerido.
+    </ion-text>
+
+    <ion-item>
+      <ion-label position="floating">Correo Electrónico</ion-label>
+      <ion-input formControlName="email" type="email"></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="registrarForm.get('email')?.invalid && registrarForm.get('email')?.touched">
+      El correo electrónico no es válido.
+    </ion-text>
+
+    <ion-item>
+      <ion-label position="floating">Contraseña</ion-label>
+      <ion-input formControlName="password" type="password"></ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="registrarForm.get('password')?.invalid && registrarForm.get('password')?.touched">
+      La contraseña debe tener al menos 6 caracteres.
+    </ion-text>
+
+    <ion-button expand="full" type="submit" [disabled]="registrarForm?.invalid">Crear Cuenta</ion-button>
+  </form>
+
+  <ion-text color="danger" *ngIf="errorMessage">{{ errorMessage }}</ion-text>
+  <ion-text color="success" *ngIf="successMessage">{{ successMessage }}</ion-text>
+</ion-content>
