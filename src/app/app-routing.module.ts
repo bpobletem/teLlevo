@@ -30,7 +30,15 @@ const routes: Routes = [
   {
     path: 'perfil',
     loadChildren: () => import('./pages/perfil/perfil.module').then( m => m.PerfilPageModule)
+  },  {
+    path: 'restablecer-password',
+    loadChildren: () => import('./pages/restablecer-password/restablecer-password.module').then( m => m.RestablecerPasswordPageModule)
   },
+  {
+    path: 'nueva-password',
+    loadChildren: () => import('./pages/nueva-password/nueva-password.module').then( m => m.NuevaPasswordPageModule)
+  },
+
 
 ];
 

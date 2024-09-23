@@ -20,11 +20,19 @@ export class PerfilPage implements OnInit {
 
   constructor() {}
 
-  guardar() {
-    // Aquí puedes agregar la lógica para guardar los datos del perfil
-    console.log('Perfil guardado:', this.user);
+  ngOnInit() {
+    this.cargarDatosPerfil();  
   }
 
-  ngOnInit() {}
+  cargarDatosPerfil() {
+    const datosGuardados = localStorage.getItem('perfilUsuario');
+    if (datosGuardados) {
+      this.user = JSON.parse(datosGuardados);
+    }
+  }
 
+  guardar() {
+    localStorage.setItem('perfilUsuario', JSON.stringify(this.user));
+    console.log('Perfil guardado:', this.user);
+  }
 }

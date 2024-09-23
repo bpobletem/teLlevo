@@ -17,14 +17,42 @@ export class CrearUsuarioPage implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private router: Router,  
-    private alertController: AlertController  
+    private router: Router,
+    private alertController: AlertController
   ) {
     this.registrarForm = this.formBuilder.group({
-      username: ['', [Validators.required]],
+      nombre: ['', [Validators.required]],
+      apellido: ['', [Validators.required]],
+      rut: ['', [Validators.required]],
+      direccion: ['', [Validators.required]],
+      comuna: ['', [Validators.required]],
+      esConductor: [false], 
+      modeloAuto: [''],
+      colorAuto: [''],
+      patenteAuto: [''],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+
+    this.registrarForm.get('esConductor')?.valueChanges.subscribe((esConductor) => {
+      this.toggleConductorFields(esConductor);
+    });
+  }
+
+  toggleConductorFields(esConductor: boolean) {
+    if (esConductor) {
+      this.registrarForm.get('modeloAuto')?.setValidators([Validators.required]);
+      this.registrarForm.get('colorAuto')?.setValidators([Validators.required]);
+      this.registrarForm.get('patenteAuto')?.setValidators([Validators.required]);
+    } else {
+      this.registrarForm.get('modeloAuto')?.clearValidators();
+      this.registrarForm.get('colorAuto')?.clearValidators();
+      this.registrarForm.get('patenteAuto')?.clearValidators();
+    }
+
+    this.registrarForm.get('modeloAuto')?.updateValueAndValidity();
+    this.registrarForm.get('colorAuto')?.updateValueAndValidity();
+    this.registrarForm.get('patenteAuto')?.updateValueAndValidity();
   }
 
   async onSubmit() {
@@ -42,9 +70,10 @@ export class CrearUsuarioPage implements OnInit {
         usuariosRegistrados.push(nuevoUsuario);
         localStorage.setItem('users', JSON.stringify(usuariosRegistrados));
 
-        this.errorMessage = '';
-        this.successMessage = 'Cuenta creada exitosamente.';
+        localStorage.setItem('perfilUsuario', JSON.stringify(nuevoUsuario));
 
+        this.errorMessage = '';
+        this.successMessage = '';
         await this.showSuccessAlert();
       }
     } else {
@@ -68,5 +97,4 @@ export class CrearUsuarioPage implements OnInit {
   }
 
   ngOnInit() {}
-
 }

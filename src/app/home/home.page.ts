@@ -18,7 +18,7 @@ export class HomePage {
   logout() {
     localStorage.removeItem('userLoggedIn');
     this.isLoggedIn = false;
-    this.router.navigate(['/login']);
+    this.router.navigate(['/iniciar-sesion']);
   }
   
   //Hacer uso de los datos guardados con localStorage da problemas con ngOnInit. El método de arriba funciona, así que se usará por ahora.
