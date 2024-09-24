@@ -1,0 +1,24 @@
+<app-encabezado titulo="Registrar Auto"></app-encabezado>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="autoForm" (ngSubmit)="submitAuto()">
+    <ion-item class="ion-no-padding">
+      <ion-label position="floating">Marca</ion-label>
+      <ion-input formControlName="marca" type="text"></ion-input>
+    </ion-item>
+
+    <ion-item class="ion-no-padding">
+      <ion-label position="floating">Modelo</ion-label>
+      <ion-input formControlName="modelo" type="text"></ion-input>
+    </ion-item>
+
+    <ion-item class="ion-no-padding">
+      <ion-label position="floating">Patente</ion-label>
+      <ion-input formControlName="patente" type="text"></ion-input>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" [disabled]="autoForm.invalid" class="ion-margin-top">
+      Guardar Auto
+    </ion-button>
+  </form>
+</ion-content>

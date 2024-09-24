@@ -1,0 +1,32 @@
+<app-encabezado titulo="Historial de viajes"></app-encabezado>
+
+<ion-content class="ion-padding">
+  <ion-chip color="primary" (click)="showTrips('piloto')" [outline]="!isPiloto">
+    <ion-label>Piloto</ion-label>
+  </ion-chip>
+  <ion-chip color="primary" (click)="showTrips('pasajero')" [outline]="!isPasajero">
+    <ion-label>Pasajero</ion-label>
+  </ion-chip>
+
+  <ion-list *ngIf="isPiloto">
+    <ion-item *ngFor="let viaje of viajesPiloto">
+      <ion-label>
+        <h2>Destino: {{ viaje.lugarDestino }}</h2>
+        <p>Fecha y Hora: {{ viaje.fechaHora }}</p>
+        <p>Pasajeros: {{ viaje.pasajeros }}</p>
+        <p>Auto: {{ viaje.auto }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-list *ngIf="isPasajero">
+    <ion-item *ngFor="let viaje of viajesPasajero">
+      <ion-label>
+        <h2>Piloto: {{ viaje.piloto }}</h2>
+        <p>Fecha y Hora: {{ viaje.fechaHora }}</p>
+        <p>Destino: {{ viaje.lugarDestino }}</p>
+        <p>Auto: {{ viaje.auto }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
