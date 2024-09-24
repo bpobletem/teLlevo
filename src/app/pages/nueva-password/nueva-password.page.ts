@@ -49,7 +49,7 @@ export class NuevaPasswordPage implements OnInit {
       this.errorMessage = '';
 
       setTimeout(() => {
-        this.router.navigate(['/login']);
+        this.router.navigate(['/iniciar-sesion']);
       }, 2000);
 
     } else {

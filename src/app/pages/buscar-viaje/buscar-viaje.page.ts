@@ -1,3 +1,4 @@
+/* eslint-disable @angular-eslint/no-empty-lifecycle-method */
 import { compileNgModule } from '@angular/compiler';
 import { Component, OnInit } from '@angular/core';
 
