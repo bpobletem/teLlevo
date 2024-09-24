@@ -38,6 +38,18 @@ const routes: Routes = [
     path: 'nueva-password',
     loadChildren: () => import('./pages/nueva-password/nueva-password.module').then( m => m.NuevaPasswordPageModule)
   },
+  {
+    path: 'historial-viajes',
+    loadChildren: () => import('./pages/historial-viajes/historial-viajes.module').then( m => m.HistorialViajesPageModule)
+  },
+  {
+    path: 'registrar-auto',
+    loadChildren: () => import('./pages/registrar-auto/registrar-auto.module').then( m => m.RegistrarAutoPageModule)
+  },
+  {
+    path: 'listar-autos',
+    loadChildren: () => import('./pages/listar-autos/listar-autos.module').then( m => m.ListarAutosPageModule)
+  },
 
 
 ];
