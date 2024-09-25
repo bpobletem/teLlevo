@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-historial-viajes',
@@ -6,7 +7,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./historial-viajes.page.scss'],
 })
 export class HistorialViajesPage implements OnInit {
-  isPiloto: boolean = true; // Para alternar entre piloto y pasajero
+
+  isPiloto: boolean = true;
   isPasajero: boolean = false;
 
   viajesPiloto = [
@@ -19,6 +21,18 @@ export class HistorialViajesPage implements OnInit {
     { piloto: 'Lucía Fernández', fechaHora: '2024-09-27 12:00', lugarDestino: 'Hospital Regional', auto: 'Mazda 3' },
   ];
 
+  constructor(private router: Router) { }
+
+  ngOnInit() {
+    const nav = this.router.getCurrentNavigation();
+    const showPasajero = nav?.extras?.state?.['showPasajero'];
+
+    if (showPasajero) {
+      this.isPiloto = false;
+      this.isPasajero = true;
+    }
+  }
+
   showTrips(type: string) {
     if (type === 'piloto') {
       this.isPiloto = true;
@@ -28,10 +42,4 @@ export class HistorialViajesPage implements OnInit {
       this.isPasajero = true;
     }
   }
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
 }

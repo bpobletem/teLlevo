@@ -1,0 +1,33 @@
+<app-encabezado titulo="Viaje en curso"></app-encabezado>
+
+<ion-content class="ion-padding">
+  <ion-card *ngIf="viaje">
+    <ion-card-header>
+      <ion-card-title>Viaje a {{ viaje.destination }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Piloto:</strong> {{ viaje.driverName || 'Tú' }}</p>
+      <p><strong>Hora de salida:</strong> {{ viaje.departureTime }}</p>
+      <p><strong>Asientos disponibles:</strong> {{ viaje.availableSeats }}</p>
+      <p><strong>Precio:</strong> ${{ viaje.price }}</p>
+      <p><strong>Auto:</strong> {{ viaje.auto || 'Desconocido' }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ng-container *ngIf="esPiloto">
+    <ion-button expand="block" color="success" (click)="finalizarViaje()">
+      Finalizar Viaje
+    </ion-button>
+  </ng-container>
+
+  <ng-container *ngIf="!esPiloto">
+    <p>El viaje está en curso. Disfruta del trayecto.</p>
+    <ion-button expand="block" color="danger" (click)="cancelarViaje()">
+      Cancelar Viaje
+    </ion-button>
+  </ng-container>
+
+  <ion-button expand="block" color="medium" (click)="verHistorial()">
+    Ver Historial de Viajes
+  </ion-button>
+</ion-content>

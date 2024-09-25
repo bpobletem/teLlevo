@@ -50,6 +50,14 @@ const routes: Routes = [
     path: 'listar-autos',
     loadChildren: () => import('./pages/listar-autos/listar-autos.module').then( m => m.ListarAutosPageModule)
   },
+  {
+    path: 'viaje-en-curso',
+    loadChildren: () => import('./pages/viaje-en-curso/viaje-en-curso.module').then( m => m.ViajeEnCursoPageModule)
+  },
+  {
+    path: 'solicitudes-de-viaje',
+    loadChildren: () => import('./pages/solicitudes-de-viaje/solicitudes-de-viaje.module').then( m => m.SolicitudesDeViajePageModule)
+  },
 
 
 ];

@@ -19,7 +19,6 @@ export class CrearViajePage  {
   constructor(private router: Router) { }
 
   createTrip() {
-    console.log('Trip created:', this.trip);
+    this.router.navigate(['/solicitudes-de-viaje'], { state: { trip: this.trip } });
   }
-
 }

@@ -1,0 +1,23 @@
+<app-encabezado titulo="Solicitudes de Viaje"></app-encabezado>
+
+<ion-content class="ion-padding">
+  <ion-list>
+    <ion-item *ngFor="let solicitud of solicitudes">
+      <ion-label>
+        <h2>{{ solicitud.nombre }}</h2>
+        <p>De: {{ solicitud.lugarInicio }} a {{ solicitud.destino }}</p>
+        <p>Hora de salida: {{ solicitud.hora }}</p>
+      </ion-label>
+      <ion-button (click)="aceptarPasajero(solicitud)" color="success">Aceptar</ion-button>
+      <ion-button  (click)="rechazarPasajero(solicitud)" color="danger">Rechazar</ion-button>
+    </ion-item>
+  </ion-list>
+
+  <ion-button expand="block" color="primary" (click)="comenzarViaje()">
+    Comenzar Viaje
+  </ion-button>
+
+  <ion-button expand="block" color="medium" (click)="verHistorial()">
+    Ver Historial de Viajes
+  </ion-button>
+</ion-content>

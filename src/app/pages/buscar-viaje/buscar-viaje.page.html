@@ -5,24 +5,24 @@
     <ion-item *ngFor="let trip of trips">
       <ion-label>
         <h2>{{ trip.driverName }} - {{ trip.destination }}</h2>
-        <p>Salida: {{ trip.departureTime }}</p>
-        <p>Asientos: {{ trip.availableSeats }}</p>
-        <p>Precio: ${{trip.price}}</p>
+        <p>Lugar de inicio: {{ trip.startLocation }}</p>
+        <p>Hora de salida: {{ trip.departureTime }}</p>
+        <p>Asientos disponibles: {{ trip.availableSeats }}</p>
+        <p>Precio: ${{ trip.price }}</p>
       </ion-label>
-      <ion-button (click)="unirseAlViaje()" fill="solid" class="ion-padding">
+      <ion-button (click)="unirseAlViaje(trip)" fill="solid" class="ion-padding">
         Unirse
       </ion-button>
     </ion-item>
   </ion-list>
 
-  <!-- Si no hay viajes -->
   <ng-template #noTrips>
     <ion-card>
       <ion-card-header>
         <ion-card-title>No hay viajes disponibles</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        No hay viajes disponible. Por favor revisa más tarde.
+        No hay viajes disponibles. Por favor revisa más tarde.
       </ion-card-content>
     </ion-card>
   </ng-template>
