@@ -1,23 +1,23 @@
 <app-encabezado titulo="Crear Viaje"></app-encabezado>
 
-<ion-content>
+<ion-content class="ion-padding">
   <form (ngSubmit)="createTrip()" #tripForm="ngForm">
-    <ion-item>
+    <ion-item class="ion-margin-end">
       <ion-input labelPlacement="floating" label="Lugar inicio" [(ngModel)]="trip.startLocation" name="startLocation"
         type="text" required></ion-input>
     </ion-item>
 
-    <ion-item>
+    <ion-item class="ion-margin-end">
       <ion-input labelPlacement="floating" label="Destino" [(ngModel)]="trip.destination" name="destination" type="text"
         required></ion-input>
     </ion-item>
 
-    <ion-item>
+    <ion-item class="ion-margin-end">
       <ion-input labelPlacement="floating" label="Asientos disponibles" [(ngModel)]="trip.availableSeats"
         name="availableSeats" type="number" required></ion-input>
     </ion-item>
 
-    <ion-item>
+    <ion-item class="ion-margin-end">
       <ion-input labelPlacement="floating" label="Tarifa" [(ngModel)]="trip.price" name="price" type="number"
         required></ion-input>
     </ion-item>
@@ -28,7 +28,7 @@
       </ion-datetime>
     </ion-item>
 
-    <ion-button expand="block" type="submit" color="primary" class="ion-padding" [disabled]="!tripForm.form.valid">
+    <ion-button expand="block" type="submit" color="primary" class="ion-margin" [disabled]="!tripForm.form.valid">
       Crear Viaje
     </ion-button>
   </form>

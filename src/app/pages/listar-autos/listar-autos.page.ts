@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import { add } from 'ionicons/icons';
+addIcons
 
 @Component({
   selector: 'app-listar-autos',
@@ -12,7 +16,9 @@ export class ListarAutosPage implements OnInit {
     { marca: 'Honda', modelo: 'Civic', patente: 'XYZ789' }
   ];
 
-  constructor(private alertController: AlertController) {}
+  constructor(private alertController: AlertController, private router: Router) {
+    addIcons({ add });
+  }
 
   async confirmarEliminar(auto:any) {
     const alert = await this.alertController.create({
@@ -36,6 +42,10 @@ export class ListarAutosPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  navigateToRegistrarAuto() {
+    this.router.navigate(['/registrar-auto']);
   }
 
   eliminarAuto(auto:any) {

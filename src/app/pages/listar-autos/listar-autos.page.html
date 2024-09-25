@@ -2,22 +2,20 @@
 
 <ion-content class="ion-padding">
   <ion-list>
-    <ion-item *ngFor="let auto of autos" class="ion-no-padding">
+    <ion-item *ngFor="let auto of autos" class="ion-margin-end">
       <ion-label>
         <h2>Marca: {{ auto.marca }}</h2>
         <p>Modelo: {{ auto.modelo }}</p>
         <p>Patente: {{ auto.patente }}</p>
       </ion-label>
-      <ion-button color="danger" (click)="confirmarEliminar(auto)" class="ion-padding">
+      <ion-button expand="block" color="danger" (click)="confirmarEliminar(auto)" class="ion-padding">
         Eliminar
       </ion-button>
     </ion-item>
   </ion-list>
-
-  <ion-card *ngIf="autos.length === 0">
-    <ion-card-content>
-      <p>No tienes autos registrados.</p>
-      <ion-button expand="block" routerLink="/registro-autos">Registrar un Auto</ion-button>
-    </ion-card-content>
-  </ion-card>
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end" class="ion-margin">
+    <ion-fab-button (click)="navigateToRegistrarAuto()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

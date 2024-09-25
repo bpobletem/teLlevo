@@ -1,30 +1,30 @@
 <app-encabezado titulo="Iniciar Sesión"></app-encabezado>
 
-<ion-content>
+<ion-content class="ion-padding">
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-    <ion-item>
+    <ion-item class="ion-margin-end">
       <ion-label position="floating">Correo Electrónico</ion-label>
       <ion-input formControlName="email" type="email"></ion-input>
     </ion-item>
-    <ion-text color="danger" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+    <ion-text color="danger" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="ion-padding ion-margin-top">
       El correo electrónico no es válido.
     </ion-text>
 
-    <ion-item>
+    <ion-item class="ion-margin-end">
       <ion-label position="floating">Contraseña</ion-label>
       <ion-input formControlName="password" type="password"></ion-input>
     </ion-item>
-    <ion-text color="danger" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+    <ion-text color="danger" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="ion-padding ion-margin-top">
       La contraseña es requerida.
     </ion-text>
 
-    <ion-button expand="full" type="submit" [disabled]="loginForm.invalid">Iniciar Sesión</ion-button>
+    <ion-button expand="block" type="submit" [disabled]="loginForm.invalid" class="ion-margin">Iniciar Sesión</ion-button>
   </form>
 
   <ion-text color="danger" *ngIf="errorMessage">{{ errorMessage }}</ion-text>
 
-  <ion-button expand="full" routerLink="/crear-usuario">¿No tienes cuenta? Crear cuenta</ion-button>
-  <ion-button expand="full" routerLink="/restablecer-password">¿Olvidaste tu contraseña?</ion-button>
+  <ion-button expand="block" routerLink="/crear-usuario" class="ion-margin" fill="outline">¿No tienes cuenta? Crear cuenta</ion-button>
+  <ion-button expand="block" routerLink="/restablecer-password" class="ion-margin" fill="outline">¿Olvidaste tu contraseña?</ion-button>
 
 </ion-content>
 

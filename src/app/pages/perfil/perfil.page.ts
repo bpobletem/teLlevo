@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-perfil',
@@ -18,7 +19,9 @@ export class PerfilPage implements OnInit {
     patenteAuto: ''
   };
 
-  constructor() {}
+  constructor(private router: Router) {}
+
+  isLoggedIn = true
 
   ngOnInit() {
     this.cargarDatosPerfil();  
@@ -29,6 +32,12 @@ export class PerfilPage implements OnInit {
     if (datosGuardados) {
       this.user = JSON.parse(datosGuardados);
     }
+  }
+
+  logout() {
+    localStorage.removeItem('userLoggedIn');
+    this.isLoggedIn = false;
+    this.router.navigate(['/iniciar-sesion']);
   }
 
   guardar() {

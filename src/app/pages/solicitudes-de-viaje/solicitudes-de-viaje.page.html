@@ -1,4 +1,4 @@
-<app-encabezado titulo="Solicitudes de Viaje"></app-encabezado>
+<app-encabezado titulo="Viaje Actual"></app-encabezado>
 
 <ion-content class="ion-padding">
   <ion-list>
@@ -13,11 +13,11 @@
     </ion-item>
   </ion-list>
 
-  <ion-button expand="block" color="primary" (click)="comenzarViaje()">
+  <ion-button expand="block" color="primary" (click)="comenzarViaje()" class="ion-margin">
     Comenzar Viaje
   </ion-button>
 
-  <ion-button expand="block" color="medium" (click)="verHistorial()">
+  <ion-button expand="block" fill="outline" (click)="verHistorial()" class="ion-margin">
     Ver Historial de Viajes
   </ion-button>
 </ion-content>

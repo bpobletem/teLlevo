@@ -24,8 +24,6 @@ export class CrearUsuarioPage implements OnInit {
       nombre: ['', [Validators.required]],
       apellido: ['', [Validators.required]],
       rut: ['', [Validators.required]],
-      direccion: ['', [Validators.required]],
-      comuna: ['', [Validators.required]],
       esConductor: [false], 
       modeloAuto: [''],
       colorAuto: [''],

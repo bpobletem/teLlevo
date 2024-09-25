@@ -10,8 +10,8 @@ import { Router } from '@angular/router';
 export class SolicitudesDeViajePage {
 
   solicitudes = [
-    { nombre: 'Carlos Muñoz', lugarInicio: 'Duoc', destino: 'Mall', hora: '08:00 AM' },
-    { nombre: 'Lucía Fernández', lugarInicio: 'Universidad', destino: 'Centro', hora: '08:15 AM' }
+    { nombre: 'Carlos Muñoz', lugarInicio: 'Duoc', destino: 'Chiguayante', hora: '08:00 AM' },
+    { nombre: 'Lucía Fernández', lugarInicio: 'Duoc', destino: 'Centro', hora: '08:15 AM' }
   ];
 
   constructor(private alertController: AlertController, private router: Router) {}
