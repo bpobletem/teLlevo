@@ -2,14 +2,12 @@
 
 <ion-content class="ion-padding">
   <ion-list>
-    <ion-item *ngFor="let solicitud of solicitudes">
+    <ion-item *ngFor="let solicitud of solicitudes" (click)="verDetalleSolicitud(solicitud)">
       <ion-label>
         <h2>{{ solicitud.nombre }}</h2>
         <p>De: {{ solicitud.lugarInicio }} a {{ solicitud.destino }}</p>
         <p>Hora de salida: {{ solicitud.hora }}</p>
       </ion-label>
-      <ion-button (click)="aceptarPasajero(solicitud)" color="success">Aceptar</ion-button>
-      <ion-button  (click)="rechazarPasajero(solicitud)" color="danger">Rechazar</ion-button>
     </ion-item>
   </ion-list>
 
