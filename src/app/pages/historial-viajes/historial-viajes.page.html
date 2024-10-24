@@ -1,17 +1,23 @@
 <app-encabezado titulo="Historial de viajes"></app-encabezado>
 
 <ion-content class="ion-padding">
-  <ion-chip color="primary" (click)="showTrips('piloto')" [outline]="!isPiloto">
-    <ion-label>Piloto</ion-label>
-  </ion-chip>
-  <ion-chip color="primary" (click)="showTrips('pasajero')" [outline]="!isPasajero">
-    <ion-label>Pasajero</ion-label>
-  </ion-chip>
+  <ion-segment value="default">
+    <ion-segment-button value="default" (click)="showTrips('piloto')" >
+      <ion-label>Piloto</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="pasajero" (click)="showTrips('pasajero')">
+      <ion-label>Pasajero</ion-label>
+    </ion-segment-button>
+  </ion-segment>
 
   <ion-list *ngIf="isPiloto">
     <ion-item *ngFor="let viaje of viajesPiloto">
       <ion-label>
-        <h2>Destino: {{ viaje.lugarDestino }}</h2>
+        <h2>Destino: {{ viaje.lugarDestino }}
+          <ion-chip color="success">
+            <ion-label>Terminado</ion-label>
+          </ion-chip>
+        </h2>
         <p>Fecha y Hora: {{ viaje.fechaHora }}</p>
         <p>Pasajeros: {{ viaje.pasajeros }}</p>
         <p>Auto: {{ viaje.auto }}</p>
@@ -22,7 +28,11 @@
   <ion-list *ngIf="isPasajero">
     <ion-item *ngFor="let viaje of viajesPasajero">
       <ion-label>
-        <h2>Piloto: {{ viaje.piloto }}</h2>
+        <h2>Piloto: {{ viaje.piloto }}
+          <ion-chip color="success">
+            <ion-label>Terminado</ion-label>
+          </ion-chip>
+        </h2>
         <p>Fecha y Hora: {{ viaje.fechaHora }}</p>
         <p>Destino: {{ viaje.lugarDestino }}</p>
         <p>Auto: {{ viaje.auto }}</p>
@@ -30,3 +40,8 @@
     </ion-item>
   </ion-list>
 </ion-content>
+
+<!--  Primary = En curso
+      Tertiary = Proximo
+      Success = Terminado 
+      Danger = Cancelado -->

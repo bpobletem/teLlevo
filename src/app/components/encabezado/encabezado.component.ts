@@ -12,15 +12,6 @@ export class EncabezadoComponent  implements OnInit {
   @Input() titulo="";
   constructor(private router: Router) { }
 
-  checkLoginStatus() {
-    this.isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-  }
-
-  goToProfile() {
-    this.router.navigate(['/perfil']);
-  }
-
   ngOnInit() {
-    this.checkLoginStatus();
   }
 }

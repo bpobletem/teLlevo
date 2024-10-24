@@ -8,9 +8,18 @@ import { Router } from '@angular/router';
 })
 export class AppComponent {
 
+  correo = "";
+  password = "";
+
   constructor(private router: Router) {}
 
   home() {
     this.router.navigate(['/home']);
+  }
+  perfil() {
+    this.router.navigate(['/perfil']);
+  }
+  viajes() {
+    this.router.navigate(['/historial-viajes']);
   }
 }

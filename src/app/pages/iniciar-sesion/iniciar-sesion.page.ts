@@ -21,16 +21,7 @@ export class IniciarSesionPage implements OnInit {
     });
   }
 
-  onSubmit() {
-    if (this.loginForm.valid) {
-    const usuario = this.srv.get(Usuario.username);
-    if (usuario){
-      
-    }
-    }
+  ngOnInit(): void {
+    
   }
-
-  ngOnInit() {
-  }
-
 }

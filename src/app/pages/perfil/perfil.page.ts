@@ -21,27 +21,7 @@ export class PerfilPage implements OnInit {
 
   constructor(private router: Router) {}
 
-  isLoggedIn = true
-
-  ngOnInit() {
-    this.cargarDatosPerfil();  
-  }
-
-  cargarDatosPerfil() {
-    const datosGuardados = localStorage.getItem('perfilUsuario');
-    if (datosGuardados) {
-      this.user = JSON.parse(datosGuardados);
-    }
-  }
-
-  logout() {
-    localStorage.removeItem('userLoggedIn');
-    this.isLoggedIn = false;
-    this.router.navigate(['/iniciar-sesion']);
-  }
-
-  guardar() {
-    localStorage.setItem('perfilUsuario', JSON.stringify(this.user));
-    console.log('Perfil guardado:', this.user);
+  ngOnInit(): void {
+    
   }
 }
