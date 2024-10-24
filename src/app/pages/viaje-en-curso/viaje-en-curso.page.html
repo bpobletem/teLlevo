@@ -1,6 +1,7 @@
 <app-encabezado titulo="Viaje en curso"></app-encabezado>
 
 <ion-content class="ion-padding">
+  <img src="assets/ruta.png" alt="Mapa del viaje"/>
   <ion-card *ngIf="viaje">
     <ion-card-header>
       <ion-card-title>Viaje a {{ viaje.destination }}</ion-card-title>
@@ -15,19 +16,19 @@
   </ion-card>
 
   <ng-container *ngIf="esPiloto">
-    <ion-button expand="block" color="success" (click)="finalizarViaje()" class="ion-margin">
+    <ion-button expand="block" color="primary" (click)="finalizarViaje()" class="ion-margin">
       Finalizar Viaje
     </ion-button>
   </ng-container>
 
   <ng-container *ngIf="!esPiloto">
     <p>El viaje está en curso. Disfruta del trayecto.</p>
-    <ion-button expand="block" color="danger" (click)="cancelarViaje()" class="ion-margin">
+    <ion-button expand="block" color="primary" (click)="cancelarViaje()" class="ion-margin">
       Cancelar Viaje
     </ion-button>
   </ng-container>
 
-  <ion-button expand="block" color="medium" (click)="verHistorial()" class="ion-margin">
+  <ion-button expand="block" fill="outline" (click)="verHistorial()" class="ion-margin">
     Ver Historial de Viajes
   </ion-button>
 </ion-content>

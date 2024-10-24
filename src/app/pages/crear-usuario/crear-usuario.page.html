@@ -4,20 +4,15 @@
   <form [formGroup]="registrarForm" (ngSubmit)="onSubmit()">
     <ion-item class="ion-margin-end">
       <ion-label position="floating">Nombre</ion-label>
-      <ion-input formControlName="nombre"></ion-input>
+      <ion-input formControlName="nombre" [(ngModel)]="usuario.username"></ion-input>
     </ion-item>
 
     <ion-item class="ion-margin-end">
       <ion-label position="floating">Apellido</ion-label>
-      <ion-input formControlName="apellido"></ion-input>
+      <ion-input formControlName="apellido" [(ngModel)]="usuario.apellido"></ion-input>
     </ion-item>
 
-    <ion-item class="ion-margin-end">
-      <ion-label position="floating">RUT</ion-label>
-      <ion-input formControlName="rut"></ion-input>
-    </ion-item>
-
-    <ion-item class="ion-margin-end">
+    <!-- <ion-item class="ion-margin-end">
       <ion-label>Quiero ser conductor</ion-label>
       <ion-checkbox slot="start" formControlName="esConductor"></ion-checkbox>
     </ion-item>
@@ -37,16 +32,16 @@
         <ion-label position="floating">Patente del Auto</ion-label>
         <ion-input formControlName="patenteAuto"></ion-input>
       </ion-item>
-    </div>
+    </div> -->
 
     <ion-item class="ion-margin-end">
       <ion-label position="floating">Correo Electrónico</ion-label>
-      <ion-input formControlName="email" type="email"></ion-input>
+      <ion-input formControlName="email" type="email" [(ngModel)]="usuario.correo"></ion-input>
     </ion-item>
 
     <ion-item class="ion-margin-end">
       <ion-label position="floating">Contraseña</ion-label>
-      <ion-input formControlName="password" type="password"></ion-input>
+      <ion-input formControlName="password" type="password" [(ngModel)]="usuario.password"></ion-input>
     </ion-item>
 
     <ion-button expand="block" type="submit" [disabled]="registrarForm.invalid" class="ion-margin">Crear Cuenta</ion-button>

@@ -4,7 +4,7 @@
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <ion-item class="ion-margin-end">
       <ion-label position="floating">Correo Electrónico</ion-label>
-      <ion-input formControlName="email" type="email"></ion-input>
+      <ion-input formControlName="email" type="email" [(ngModel)]="usuario.correo"></ion-input>
     </ion-item>
     <ion-text color="danger" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="ion-padding ion-margin-top">
       El correo electrónico no es válido.
@@ -12,7 +12,7 @@
 
     <ion-item class="ion-margin-end">
       <ion-label position="floating">Contraseña</ion-label>
-      <ion-input formControlName="password" type="password"></ion-input>
+      <ion-input formControlName="password" type="password" [(ngModel)]="usario.password"></ion-input>
     </ion-item>
     <ion-text color="danger" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="ion-padding ion-margin-top">
       La contraseña es requerida.

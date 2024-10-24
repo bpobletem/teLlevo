@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
+import { Usuario } from 'src/app/interface/usuario';
+import { StorageService } from 'src/app/services/datos.service';
 
 @Component({
   selector: 'app-crear-usuario',
@@ -15,84 +17,101 @@ export class CrearUsuarioPage implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
 
+usuario: Usuario = {
+  username: '',
+  password: '',
+  nombre: '',
+  apellido: '',
+  correo: ''
+}
+
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private srv:StorageService
   ) {
     this.registrarForm = this.formBuilder.group({
       nombre: ['', [Validators.required]],
       apellido: ['', [Validators.required]],
-      rut: ['', [Validators.required]],
-      esConductor: [false], 
-      modeloAuto: [''],
-      colorAuto: [''],
-      patenteAuto: [''],
+      // rut: ['', [Validators.required]],
+      // esConductor: [false], 
+      // modeloAuto: [''],
+      // colorAuto: [''],
+      // patenteAuto: [''],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
 
-    this.registrarForm.get('esConductor')?.valueChanges.subscribe((esConductor) => {
-      this.toggleConductorFields(esConductor);
-    });
+    // this.registrarForm.get('esConductor')?.valueChanges.subscribe((esConductor) => {
+    //   this.toggleConductorFields(esConductor);
+    // });
   }
 
-  toggleConductorFields(esConductor: boolean) {
-    if (esConductor) {
-      this.registrarForm.get('modeloAuto')?.setValidators([Validators.required]);
-      this.registrarForm.get('colorAuto')?.setValidators([Validators.required]);
-      this.registrarForm.get('patenteAuto')?.setValidators([Validators.required]);
-    } else {
-      this.registrarForm.get('modeloAuto')?.clearValidators();
-      this.registrarForm.get('colorAuto')?.clearValidators();
-      this.registrarForm.get('patenteAuto')?.clearValidators();
-    }
+  // toggleConductorFields(esConductor: boolean) {
+  //   if (esConductor) {
+  //     this.registrarForm.get('modeloAuto')?.setValidators([Validators.required]);
+  //     this.registrarForm.get('colorAuto')?.setValidators([Validators.required]);
+  //     this.registrarForm.get('patenteAuto')?.setValidators([Validators.required]);
+  //   } else {
+  //     this.registrarForm.get('modeloAuto')?.clearValidators();
+  //     this.registrarForm.get('colorAuto')?.clearValidators();
+  //     this.registrarForm.get('patenteAuto')?.clearValidators();
+  //   }
 
-    this.registrarForm.get('modeloAuto')?.updateValueAndValidity();
-    this.registrarForm.get('colorAuto')?.updateValueAndValidity();
-    this.registrarForm.get('patenteAuto')?.updateValueAndValidity();
+  //   this.registrarForm.get('modeloAuto')?.updateValueAndValidity();
+  //   this.registrarForm.get('colorAuto')?.updateValueAndValidity();
+  //   this.registrarForm.get('patenteAuto')?.updateValueAndValidity();
+  // }
+
+  guardarUsuario() {
+    this.srv.set('Usuario', this.usuario);
+    console.log('Usuario guardado.');
   }
 
-  async onSubmit() {
-    if (this.registrarForm.valid) {
-      const nuevoUsuario = this.registrarForm.value;
+   async onSubmit() {
+     if (this.registrarForm.valid) {
+      this.srv.set('Usuario', this.usuario);
 
-      let usuariosRegistrados = JSON.parse(localStorage.getItem('users') || '[]');
+      this.guardarUsuario();
+       // const nuevoUsuario = this.registrarForm.value;
 
-      const userExists = usuariosRegistrados.find((user: any) => user.email === nuevoUsuario.email);
+  //     let usuariosRegistrados = JSON.parse(localStorage.getItem('users') || '[]');
 
-      if (userExists) {
-        this.errorMessage = 'Ya existe una cuenta con este correo electrónico.';
-        this.successMessage = '';
-      } else {
-        usuariosRegistrados.push(nuevoUsuario);
-        localStorage.setItem('users', JSON.stringify(usuariosRegistrados));
+  //     const userExists = usuariosRegistrados.find((user: any) => user.email === nuevoUsuario.email);
 
-        localStorage.setItem('perfilUsuario', JSON.stringify(nuevoUsuario));
+  //     if (userExists) {
+  //       this.errorMessage = 'Ya existe una cuenta con este correo electrónico.';
+  //       this.successMessage = '';
+  //     } else {
+  //       usuariosRegistrados.push(nuevoUsuario);
+  //       localStorage.setItem('users', JSON.stringify(usuariosRegistrados));
 
-        this.errorMessage = '';
-        this.successMessage = '';
-        await this.showSuccessAlert();
-      }
-    } else {
-      this.errorMessage = 'Por favor, rellene el formulario correctamente.';
-    }
-  }
+  //       localStorage.setItem('perfilUsuario', JSON.stringify(nuevoUsuario));
 
-  async showSuccessAlert() {
-    const alert = await this.alertController.create({
-      header: 'Éxito',
-      message: 'Cuenta creada exitosamente.',
-      buttons: [{
-        text: 'OK',
-        handler: () => {
-          this.router.navigate(['/iniciar-sesion']);
-        }
-      }]
-    });
+  //       this.errorMessage = '';
+  //       this.successMessage = '';
+  //       await this.showSuccessAlert();
+  //     }
+  //   } else {
+  //     this.errorMessage = 'Por favor, rellene el formulario correctamente.';
+   }
+ }
 
-    await alert.present();
-  }
+  // async showSuccessAlert() {
+  //   const alert = await this.alertController.create({
+  //     header: 'Éxito',
+  //     message: 'Cuenta creada exitosamente.',
+  //     buttons: [{
+  //       text: 'OK',
+  //       handler: () => {
+  //         this.router.navigate(['/iniciar-sesion']);
+  //       }
+  //     }]
+  //   });
+
+  //   await alert.present();
+  // }
 
   ngOnInit() {}
 }
