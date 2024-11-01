@@ -21,3 +21,9 @@ export interface Viaje {
     destino: string;
 }
 
+export interface Auto {
+    marca: string;
+    modelo: string;
+    patente: string;
+    propietario: string;
+}
