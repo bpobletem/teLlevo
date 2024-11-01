@@ -19,6 +19,8 @@ export interface Viaje {
     piloto: Usuario;
     pasajeros: Usuario[];
     destino: string;
+    fechaSalida: string;
+    fechaTermino:string;
 }
 
 export interface Auto {

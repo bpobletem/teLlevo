@@ -8,7 +8,7 @@ import { IonicModule } from '@ionic/angular';
 import { IniciarSesionPageRoutingModule } from './iniciar-sesion-routing.module';
 
 import { IniciarSesionPage } from './iniciar-sesion.page';
-import { ComponentsModule } from "../../components/components.module";
+import { ComponentsModule } from "../../../components/components.module";
 
 @NgModule({
   imports: [

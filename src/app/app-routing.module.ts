@@ -21,22 +21,23 @@ const routes: Routes = [
   },
   {
     path: 'crear-usuario',
-    loadChildren: () => import('./pages/crear-usuario/crear-usuario.module').then( m => m.CrearUsuarioPageModule)
+    loadChildren: () => import('./pages/auth/crear-usuario/crear-usuario.module').then( m => m.CrearUsuarioPageModule)
   },
   {
     path: 'iniciar-sesion',
-    loadChildren: () => import('./pages/iniciar-sesion/iniciar-sesion.module').then( m => m.IniciarSesionPageModule)
+    loadChildren: () => import('./pages/auth/iniciar-sesion/iniciar-sesion.module').then( m => m.IniciarSesionPageModule)
   },
   {
     path: 'perfil',
     loadChildren: () => import('./pages/perfil/perfil.module').then( m => m.PerfilPageModule)
-  },  {
+  },
+  {
     path: 'restablecer-password',
-    loadChildren: () => import('./pages/restablecer-password/restablecer-password.module').then( m => m.RestablecerPasswordPageModule)
+    loadChildren: () => import('./pages/auth/restablecer-password/restablecer-password.module').then( m => m.RestablecerPasswordPageModule)
   },
   {
     path: 'nueva-password',
-    loadChildren: () => import('./pages/nueva-password/nueva-password.module').then( m => m.NuevaPasswordPageModule)
+    loadChildren: () => import('./pages/auth/nueva-password/nueva-password.module').then( m => m.NuevaPasswordPageModule)
   },
   {
     path: 'historial-viajes',
