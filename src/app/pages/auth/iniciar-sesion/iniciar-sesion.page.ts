@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Usuario } from 'src/app/interfaces/interfaces';
 import { StorageService} from 'src/app/services/datos.service';
 import { FirebaseService } from 'src/app/services/firebase.service';
+import { UtilsService } from 'src/app/services/utils.service';
 
 @Component({
   selector: 'app-iniciar-sesion',
@@ -16,7 +17,8 @@ export class IniciarSesionPage implements OnInit {
   loginForm: FormGroup;
   errorMessage: string = '';
 
-  firebaseSrv = inject(FirebaseService)
+  firebaseSrv = inject(FirebaseService);
+  utilsSrv = inject(UtilsService);
 
   constructor(private formBuilder: FormBuilder, private router: Router, private srv:StorageService,) {
     this.loginForm = this.formBuilder.group({
@@ -29,12 +31,18 @@ export class IniciarSesionPage implements OnInit {
     
   }
 
-  submit() {
+  async submit() {
     if (this.loginForm.valid) {
+      const loading = await this.utilsSrv.loading();
+      await loading.present();
       this.firebaseSrv.signIn(this.loginForm.value as Usuario).then(res => {
-        console.log("Usuario autenticado")
-        console.log(res)
-        this.router.navigate(['/home'])
+        console.log("Usuario autenticado");
+        console.log(res);
+        this.router.navigate(['/home']);
+      }).catch(error => {
+        console.log(error)
+      }).finally(() => {
+        loading.dismiss();
       })
     }
   }
