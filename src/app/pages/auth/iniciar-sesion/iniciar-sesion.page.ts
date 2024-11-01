@@ -40,6 +40,13 @@ export class IniciarSesionPage implements OnInit {
         console.log(res);
         this.router.navigate(['/home']);
       }).catch(error => {
+        this.utilsSrv.presentToast({
+          message: error.message,
+          duration: 2500,
+          color: 'primary',
+          position: 'bottom',
+          icon: 'alert-circle-outline'
+        })
         console.log(error)
       }).finally(() => {
         loading.dismiss();
