@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
-import { Usuario } from 'src/app/interface/usuario';
+import { Usuario } from 'src/app/interfaces/interfaces';
 import { StorageService } from 'src/app/services/datos.service';
 
 @Component({
