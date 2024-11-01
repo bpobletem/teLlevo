@@ -17,7 +17,7 @@ export interface Usuario {
 export interface Viaje {
     estado: estadoViaje;
     piloto: Usuario;
-    pasajeros: Array<Usuario>;
+    pasajeros: Usuario[];
     destino: string;
 }
 
