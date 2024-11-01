@@ -4,9 +4,9 @@
   <form [formGroup]="loginForm">
     <ion-item class="ion-margin-end">
       <ion-label position="floating">Correo Electrónico</ion-label>
-      <ion-input formControlName="email" type="email"></ion-input>
+      <ion-input formControlName="correo" type="email"></ion-input>
     </ion-item>
-    <ion-text color="danger" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="ion-padding ion-margin-top">
+    <ion-text color="danger" *ngIf="loginForm.get('correo')?.invalid && loginForm.get('correo')?.touched" class="ion-padding ion-margin-top">
       El correo electrónico no es válido.
     </ion-text>
 
@@ -18,7 +18,7 @@
       La contraseña es requerida.
     </ion-text>
 
-    <ion-button expand="block" type="submit" [disabled]="loginForm.invalid" class="ion-margin">Iniciar Sesión</ion-button>
+    <ion-button expand="block" type="submit" [disabled]="loginForm.invalid" (click)="submit()" class="ion-margin">Iniciar Sesión</ion-button>
   </form>
 
   <ion-text color="danger" *ngIf="errorMessage">{{ errorMessage }}</ion-text>
