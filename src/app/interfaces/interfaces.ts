@@ -7,11 +7,12 @@ enum estadoViaje{
 }
 
 export interface Usuario {
-    username: string;
-    password: string;
+    uid: string
+    correo: string;
     nombre: string;
     apellido: string;
-    correo: string;
+    password: string;
+    esConductor: boolean;
 }
 
 export interface Viaje {
@@ -21,6 +22,7 @@ export interface Viaje {
     destino: string;
     fechaSalida: string;
     fechaTermino:string;
+    auto: Auto;
 }
 
 export interface Auto {
