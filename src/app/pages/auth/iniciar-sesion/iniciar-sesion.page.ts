@@ -66,7 +66,7 @@ export class IniciarSesionPage implements OnInit {
       let path = `Usuario/${uid}`;
 
       this.firebaseSrv.getDocument(path).then( (user: Usuario) => {
-          this.localStorageSrv.set(this.correo, user);
+          this.localStorageSrv.set('sesion', uid);
           this.router.navigate(['/home']);
           this.form.reset();
 
