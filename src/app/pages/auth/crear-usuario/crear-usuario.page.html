@@ -16,8 +16,9 @@
       <ion-label>Quiero ser conductor</ion-label>
       <ion-checkbox slot="start" formControlName="esConductor"></ion-checkbox>
     </ion-item>
-
-    <div *ngIf="registrarForm.get('esConductor')?.value">
+  </form>
+  <form>
+    <div [formGroup]="autoForm" *ngIf="registrarForm.get('esConductor')?.value">
       <ion-item>
         <ion-label position="floating">Modelo de Auto</ion-label>
         <ion-input formControlName="modeloAuto"></ion-input>
@@ -43,7 +44,6 @@
       <ion-label position="floating">Contraseña</ion-label>
       <ion-input formControlName="password" type="password" ></ion-input>
     </ion-item>
-
-    <ion-button expand="block" type="submit" [disabled]="registrarForm.invalid" class="ion-margin">Crear Cuenta</ion-button>
   </form>
+  <ion-button expand="block" type="submit" [disabled]="registrarForm.invalid" class="ion-margin">Crear Cuenta</ion-button>
 </ion-content>
