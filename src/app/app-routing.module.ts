@@ -31,6 +31,7 @@ const routes: Routes = [
   },
   {
     path: 'perfil',
+    canActivate: [authGuard],
     loadChildren: () => import('./pages/perfil/perfil.module').then( m => m.PerfilPageModule)
   },
   {
@@ -43,6 +44,7 @@ const routes: Routes = [
   },
   {
     path: 'historial-viajes',
+    canActivate: [authGuard],
     loadChildren: () => import('./pages/historial-viajes/historial-viajes.module').then( m => m.HistorialViajesPageModule)
   },
   {
