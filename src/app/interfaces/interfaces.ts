@@ -29,5 +29,5 @@ export interface Auto {
     marca: string;
     modelo: string;
     patente: string;
-    propietario: Usuario;
+    propietario: string; //uid del usuario como referencia
 }
