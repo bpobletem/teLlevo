@@ -1,7 +1,7 @@
 <app-encabezado titulo="Registrar Auto"></app-encabezado>
 
 <ion-content class="ion-padding">
-  <form [formGroup]="autoForm" (ngSubmit)="submitAuto()">
+  <form [formGroup]="autoForm" (ngSubmit)="saveAuto()">
     <ion-item class="ion-margin-end">
       <ion-label position="floating">Marca</ion-label>
       <ion-input formControlName="marca" type="text"></ion-input>
