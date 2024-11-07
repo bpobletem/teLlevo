@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { collection, collectionData, doc, Firestore, setDoc, getFirestore, getDoc } from '@angular/fire/firestore';
+import { collection, collectionData, doc, Firestore, setDoc, getFirestore, getDoc, query, where, getDocs } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Auth, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from '@angular/fire/auth';
 import { Usuario } from '../interfaces/interfaces';
@@ -56,5 +56,16 @@ export class FirebaseService {
     const document = doc(getFirestore(), path);
     return setDoc(document, data);
   }
+
+  //get document with query
+  async getDocumentsByReference(path: string, referenceField: string, referenceValue: any) {
+    const itemCollection = collection(this.firestore, path);
+    const q = query(itemCollection, where(referenceField, '==', referenceValue));
+    const querySnapshot = await getDocs(q);
+    const results = querySnapshot.docs.map(doc => doc.data());
+    return results;
+  }
+
+  
 
 }
