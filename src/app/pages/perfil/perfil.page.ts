@@ -32,18 +32,26 @@ export class PerfilPage implements OnInit {
     this.loadUser();
   }
 
-  async loadUser() {
-    try {
+  loadUser() {
+    this.utilsSrv.loading().then(loading => {
+      loading.present();
+  
       const uid = this.firebaseSrv.auth.currentUser.uid;
-      const user = await this.firebaseSrv.getDocument(`Usuario/${uid}`);
-      if (user) {
-        this.currentUser = user as Usuario;
-        console.log(this.currentUser);
-      } else {
-        console.error('Usuario no encontrado');
-      }
-    } catch (error) {
-      console.error('Error al cargar el usuario:', error);
-    }
+      this.firebaseSrv.getDocument(`Usuario/${uid}`)
+        .then(user => {
+          if (user) {
+            this.currentUser = user as Usuario;
+            console.log(this.currentUser);
+          } else {
+            console.error('Usuario no encontrado');
+          }
+        })
+        .catch(error => {
+          console.error('Error al cargar el usuario:', error);
+        })
+        .finally(() => {
+          loading.dismiss();
+        });
+    });
   }
 }
