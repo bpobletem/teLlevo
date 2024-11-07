@@ -1,10 +1,8 @@
-import { setDoc } from '@angular/fire/firestore';
-/* eslint-disable @angular-eslint/no-empty-lifecycle-method */
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auto, Usuario } from 'src/app/interfaces/interfaces';
-import { StorageService} from 'src/app/services/storage.service';
+import { StorageService } from 'src/app/services/storage.service';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { UtilsService } from 'src/app/services/utils.service';
 
@@ -14,7 +12,6 @@ import { UtilsService } from 'src/app/services/utils.service';
   styleUrls: ['./crear-usuario.page.scss'],
 })
 export class CrearUsuarioPage implements OnInit {
-
   usuario: Usuario = {
     uid: '',
     password: '',
@@ -22,14 +19,14 @@ export class CrearUsuarioPage implements OnInit {
     apellido: '',
     correo: '',
     esConductor: false
-  }
+  };
 
   auto: Auto = {
     marca: '',
     modelo: '',
     patente: '',
     propietario: this.usuario
-  }
+  };
 
   registrarForm: FormGroup;
   autoForm: FormGroup;
@@ -47,30 +44,36 @@ export class CrearUsuarioPage implements OnInit {
       esConductor: [false],
     });
     this.autoForm = this.formBuilder.group({
-      modeloAuto: [''],
-      marcaAuto: [''],
-      colorAuto: [''],
-      patenteAuto: ['']
+      propietario: [''],
+      modelo: ['', Validators.required],
+      marca: ['', Validators.required],
+      patente: ['', Validators.required],
     });
   }
 
-  ngOnInit(): void {
-    
-  }
+  ngOnInit(): void {}
 
   async submit() {
     if (this.registrarForm.valid) {
       const loading = await this.utilsSrv.loading();
       await loading.present();
-      console.log('empezando el submit')
-      await this.firebaseSrv.signUp(this.registrarForm.value as Usuario) 
+
+      // Crear usuario en Firebase
+      await this.firebaseSrv.signUp(this.registrarForm.value as Usuario)
         .then(async res => {
-          console.log('esperando respuesta del signup')
-          await this.firebaseSrv.updateUser(this.registrarForm.value.nombre);
           let uid = res.user.uid;
           this.registrarForm.controls['uid'].setValue(uid);
-          this.setUser(uid);
-        }).catch(error => {
+          // Si el usuario seleccionó "Quiero ser conductor", guardar auto
+          const esConductor = this.registrarForm.get('esConductor')?.value;
+          await this.setUser(uid); // Guardar datos del usuario en Firestore
+          if (esConductor) {
+            this.autoForm.controls['propietario'].setValue(`Usuario/${uid}`);
+            await this.saveAuto(uid);
+          }
+
+          this.router.navigate(['/iniciar-sesion']);
+        })
+        .catch(error => {
           this.utilsSrv.presentToast({
             message: error.message,
             duration: 2500,
@@ -79,7 +82,8 @@ export class CrearUsuarioPage implements OnInit {
             icon: 'alert-circle-outline'
           });
           console.log(error);
-        }).finally(() => {
+        })
+        .finally(() => {
           loading.dismiss();
         });
     }
@@ -87,18 +91,18 @@ export class CrearUsuarioPage implements OnInit {
 
   async setUser(uid: string) {
     if (this.registrarForm.valid) {
-      console.log('seteando usuario')
       const loading = await this.utilsSrv.loading();
       await loading.present();
 
       let path = `Usuario/${uid}`;
       delete this.registrarForm.value.password;
 
-      this.firebaseSrv.setDocument(path, this.registrarForm.value).then(async res => {
+      await this.firebaseSrv.setDocument(path, this.registrarForm.value)
+        .then(() => {
           this.localStorageSrv.set(uid, this.registrarForm.value);
-          this.router.navigate(['/iniciar-sesion']);
           this.registrarForm.reset();
-        }).catch(error => {
+        })
+        .catch(error => {
           this.utilsSrv.presentToast({
             message: error.message,
             duration: 2500,
@@ -107,12 +111,30 @@ export class CrearUsuarioPage implements OnInit {
             icon: 'alert-circle-outline'
           });
           console.log(error);
-        }).finally(() => {
+        })
+        .finally(() => {
           loading.dismiss();
         });
     }
   }
-  
 
-
+  async saveAuto(uid: string) {
+    if (this.autoForm.valid) {
+      let path = `Auto/${uid}`;
+      await this.firebaseSrv.setDocument(path, this.autoForm.value)
+        .then(() => {
+          this.autoForm.reset();
+        })
+        .catch(error => {
+          this.utilsSrv.presentToast({
+            message: error.message,
+            duration: 2500,
+            color: 'danger',
+            position: 'bottom',
+            icon: 'alert-circle-outline'
+          });
+          console.log(error);
+        });
+    }
+  }
 }

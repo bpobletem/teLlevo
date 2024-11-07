@@ -1,6 +1,7 @@
 <app-encabezado titulo="Crear Usuario"></app-encabezado>
 
 <ion-content scroll-y="true" class="ion-padding">
+  <!-- Formulario de registro de usuario -->
   <form [formGroup]="registrarForm" (ngSubmit)="submit()">
     <ion-item class="ion-margin-end">
       <ion-label position="floating">Nombre</ion-label>
@@ -13,28 +14,6 @@
     </ion-item>
 
     <ion-item class="ion-margin-end">
-      <ion-label>Quiero ser conductor</ion-label>
-      <ion-checkbox slot="start" formControlName="esConductor"></ion-checkbox>
-    </ion-item>
-
-    <div [formGroup]="autoForm" *ngIf="registrarForm.get('esConductor')?.value">
-      <ion-item>
-        <ion-label position="floating">Modelo de Auto</ion-label>
-        <ion-input formControlName="modeloAuto"></ion-input>
-      </ion-item>
-
-      <ion-item class="ion-margin-end">
-        <ion-label position="floating">Marca de Auto</ion-label>
-        <ion-input formControlName="marcaAuto"></ion-input>
-      </ion-item>
-
-      <ion-item class="ion-margin-end">
-        <ion-label position="floating">Patente del Auto</ion-label>
-        <ion-input formControlName="patenteAuto"></ion-input>
-      </ion-item>
-    </div>
-
-    <ion-item class="ion-margin-end">
       <ion-label position="floating">Correo Electrónico</ion-label>
       <ion-input formControlName="correo" type="email"></ion-input>
     </ion-item>
@@ -44,8 +23,30 @@
       <ion-input formControlName="password" type="password"></ion-input>
     </ion-item>
 
-    <ion-button expand="block" type="submit" [disabled]="registrarForm.invalid" class="ion-margin">
-      Crear Cuenta
-    </ion-button>
+    <ion-item class="ion-margin-end">
+      <ion-label>Quiero ser conductor</ion-label>
+      <ion-checkbox slot="start" formControlName="esConductor"></ion-checkbox>
+    </ion-item>
   </form>
+
+  <!-- Formulario del auto, visible solo si esConductor está marcado -->
+  <form *ngIf="registrarForm.get('esConductor')?.value" [formGroup]="autoForm">
+    <ion-item class="ion-margin-end">
+      <ion-label position="floating">Marca de Auto</ion-label>
+      <ion-input formControlName="marca"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Modelo de Auto</ion-label>
+      <ion-input formControlName="modelo"></ion-input>
+    </ion-item>
+
+    <ion-item class="ion-margin-end">
+      <ion-label position="floating">Patente del Auto</ion-label>
+      <ion-input formControlName="patente"></ion-input>
+    </ion-item>
+  </form>
+
+  <!-- Botón para enviar ambos formularios -->
+  <ion-button expand="block" type="submit" [disabled]="registrarForm.invalid" class="ion-margin" (click)="submit()">Crear Cuenta</ion-button>
 </ion-content>
