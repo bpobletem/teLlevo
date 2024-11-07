@@ -5,6 +5,7 @@ import { FirebaseService } from 'src/app/services/firebase.service';  // Asegúr
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { StorageService } from 'src/app/services/storage.service';
+import { Auto } from 'src/app/interfaces/interfaces';
 addIcons({ add });
 
 @Component({
@@ -16,12 +17,17 @@ export class ListarAutosPage implements OnInit {
   autos = [];  // Array para almacenar los autos obtenidos
   firebaseSrv = inject(FirebaseService);  // Inyectamos FirebaseService
   storageSrv = inject(StorageService);
+  uid = '';
   constructor(private alertController: AlertController, private router: Router) {
     addIcons({ add });
   }
 
   async ngOnInit() {
-    await this.obtenerAutos();  // Llamamos a la función para obtener los autos
+    this.uid = await this.storageSrv.get('sesion');
+    this.firebaseSrv.getCollectionChanges<Auto>('Auto').subscribe((autos) => {
+      console.log(this.uid)
+      this.autos = autos.filter((auto) => auto.propietario === `Usuario/${this.uid}`);
+    });
   }
 
   // Función para obtener los autos de Firebase
