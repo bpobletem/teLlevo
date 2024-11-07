@@ -10,8 +10,6 @@ export const authGuard: CanActivateFn = async (route, state) => {
 
   try {
     const userUid = await storageSrv.get('sesion'); // Espera la promesa para obtener el userUid
-    console.log(userUid);
-    console.log(firebaseSrv.auth.currentUser);
 
     if (firebaseSrv.auth.currentUser !== null) {
       const uid = firebaseSrv.auth.currentUser.uid;
