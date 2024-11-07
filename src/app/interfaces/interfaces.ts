@@ -1,5 +1,5 @@
 
-enum estadoViaje{
+export enum estadoViaje{
     'pendiente',
     'enCurso',
     'cancelado',
@@ -21,8 +21,8 @@ export interface Viaje {
     pasajeros: Usuario[];
     destino: string;
     fechaSalida: string;
-    fechaTermino:string;
     auto: Auto;
+    precio: number;
 }
 
 export interface Auto {

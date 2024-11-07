@@ -48,6 +48,7 @@ export class CrearUsuarioPage implements OnInit {
     });
     this.autoForm = this.formBuilder.group({
       modeloAuto: [''],
+      marcaAuto: [''],
       colorAuto: [''],
       patenteAuto: ['']
     });

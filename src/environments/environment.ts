@@ -10,7 +10,8 @@ export const environment = {
     projectId: "tellevoapp-16716",
     storageBucket: "tellevoapp-16716.firebasestorage.app",
     messagingSenderId: "237458071393",
-    appId: "1:237458071393:web:a22f819922c6fdfa466f20"
+    appId: "1:237458071393:web:a22f819922c6fdfa466f20",
+    mapboxAccessToken: 'pk.eyJ1Ijoidmlzb2xvcnphIiwiYSI6ImNsdzI4MDU0YjBqa3YycnJrbWtwNjRxbzAifQ.lohT4Kkxan3imEmg-l8NJg',
   }
 };
 
