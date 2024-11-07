@@ -3,6 +3,8 @@ import { collection, collectionData, doc, Firestore, setDoc, getFirestore, getDo
 import { Observable } from 'rxjs';
 import { Auth, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from '@angular/fire/auth';
 import { Usuario } from '../interfaces/interfaces';
+import { StorageService } from './storage.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +13,8 @@ import { Usuario } from '../interfaces/interfaces';
 export class FirebaseService {
   firestore: Firestore = inject(Firestore)
   auth = inject(Auth)
+  storageSrv = inject(StorageService);
+  router = inject(Router);
   constructor() { }
 
 
@@ -29,6 +33,12 @@ export class FirebaseService {
 
   sendRecoveryEmail(email: string) {
     return sendPasswordResetEmail(getAuth(), email)
+  }
+
+  signOut() {
+    getAuth().signOut();
+    this.storageSrv.remove('sesion');
+    this.router.navigate(['/iniciar-sesion']);
   }
 
   // db
