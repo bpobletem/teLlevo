@@ -21,7 +21,10 @@ export class CrearViajePage implements OnInit {
   utilsSrv = inject(UtilsService);
   localStorageSrv = inject(StorageService);
 
-  constructor(private formBuilder: FormBuilder, private router: Router) {}
+  constructor(
+    private formBuilder: FormBuilder,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.inicializarFormulario();
@@ -29,7 +32,6 @@ export class CrearViajePage implements OnInit {
   }
 
   inicializarFormulario() {
-    // Inicialización del formulario de viaje con validación
     this.formularioViaje = this.formBuilder.group({
       destino: ['', Validators.required],
       fechaSalida: ['', Validators.required],
@@ -43,8 +45,7 @@ export class CrearViajePage implements OnInit {
       if (uid) {
         const pathUsuario = `Usuario/${uid}`;
         this.usuarioActual = await this.firebaseSrv.getDocument(pathUsuario) as Usuario;
-        
-        // Solo intenta cargar el auto si el usuario es conductor
+
         if (this.usuarioActual?.esConductor) {
           const pathAuto = `Autos/${uid}`;
           this.autoUsuario = await this.firebaseSrv.getDocument(pathAuto) as Auto;
@@ -61,8 +62,12 @@ export class CrearViajePage implements OnInit {
     }
   }
 
+  // Método para actualizar el campo destino con el valor seleccionado en el mapa
+  onDestinoSeleccionado(destino: string): void {
+    this.formularioViaje.get('destino')?.setValue(destino);
+  }
+
   async crearViaje() {
-    // Verificar que el formulario es válido y el usuario está cargado correctamente
     if (this.formularioViaje?.valid && this.usuarioActual) {
       const loading = await this.utilsSrv.loading();
       await loading.present();

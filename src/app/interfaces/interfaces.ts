@@ -1,3 +1,4 @@
+import { DatetimeChangeEventDetail } from "@ionic/angular";
 
 export enum estadoViaje{
     'pendiente',
