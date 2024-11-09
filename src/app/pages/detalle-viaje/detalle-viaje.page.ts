@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AlertController } from '@ionic/angular';
-import { Router } from '@angular/router';
-import { FormGroup, Validators } from '@angular/forms';
+import { FirebaseService } from '../../services/firebase.service';
+import { StorageService } from '../../services/storage.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-detalle-viaje',
@@ -12,13 +14,27 @@ export class DetalleViajePage implements OnInit {
 
   destino: string = '';
   formularioViaje!: FormGroup;
-  formBuilder: any;
+  firebaseSrv = inject(FirebaseService);
+  storageSrv = inject(StorageService);
 
-  constructor(private alertController: AlertController, private router: Router) {
+  viaje: any = {};
+  pasajeroId: string = '';
+  viajeId: string = '';
 
-   }
+  constructor(
+    private alertController: AlertController,
+    private router: Router,
+    private formBuilder: FormBuilder
+  ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
+    this.pasajeroId = await this.storageSrv.get('sesion');
+    if (this.router.getCurrentNavigation()?.extras.state) {
+      let extras = this.router.getCurrentNavigation()?.extras.state;
+      this.viaje = extras['viaje'] ;
+      this.viajeId = this.viaje.id;
+    }
+
     this.inicializarFormulario();
   }
 
@@ -51,15 +67,24 @@ export class DetalleViajePage implements OnInit {
         {
           text: 'Confirmar',
           handler: () => {
-            //aqui hay que agregar al usuario al array de pasajeros del viaje
-            console.log('Solicitud confirmada');
-            this.router.navigate(['/historial-viajes']);
-          }
-        }
-      ]
+            console.log('confirmadooo')
+          },
+        },
+      ],
     });
     await alert.present();
   }
 
-  
+  async solicitarUnirseAlViaje(viajeId: string, pasajeroId: string) {
+    try {
+      await this.firebaseSrv.setDocument(`SolicitudesViaje/${viajeId + pasajeroId}`, {
+        viajeId: viajeId,
+        pasajeroId: pasajeroId,
+        estado: 'pendiente'
+      })
+      console.log('Solicitud de unión enviada.');
+    } catch (error) {
+      console.error('Error al enviar la solicitud:', error);
+    }
+  }
 }
