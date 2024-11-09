@@ -1,27 +1,22 @@
-import { CanActivateFn, Router } from '@angular/router';
+import { Injectable } from '@angular/core';
+import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import { FirebaseService } from '../services/firebase.service';
-import { inject } from '@angular/core';
-import { StorageService } from '../services/storage.service';
 
-export const authGuard: CanActivateFn = async (route, state) => {
-  const firebaseSrv = inject(FirebaseService);
-  const router = inject(Router);
-  const storageSrv = inject(StorageService);
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthGuard implements CanActivate {
 
-  try {
-    const userUid = await storageSrv.get('sesion'); // Espera la promesa para obtener el userUid
+  constructor(private firebaseService: FirebaseService, private router: Router) {}
 
-    if (firebaseSrv.auth.currentUser !== null) {
-      const uid = firebaseSrv.auth.currentUser.uid;
-      if (uid === userUid) {
-        return true;
-      }
+  async canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Promise<boolean | UrlTree> {
+    const isAuthenticated = await this.firebaseService.checkAndClearSession();
+    if (!isAuthenticated) {
+      return this.router.createUrlTree(['/iniciar-sesion']);
     }
-    await router.navigate(['/iniciar-sesion']);
-    return false;
-  } catch (error) {
-    console.error('Error obteniendo el UID del usuario:', error);
-    await router.navigate(['/iniciar-sesion']);
-    return false;
+    return true;
   }
-};
+}
