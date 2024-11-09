@@ -1,24 +1,26 @@
-import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { Viaje, estadoViaje } from 'src/app/interfaces/interfaces';
+import { Component, OnInit, inject } from '@angular/core';
+import { Router, NavigationExtras } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { UtilsService } from 'src/app/services/utils.service';
+import { Viaje, estadoViaje } from 'src/app/interfaces/interfaces';
 
 @Component({
   selector: 'app-buscar-viaje',
   templateUrl: './buscar-viaje.page.html',
   styleUrls: ['./buscar-viaje.page.scss'],
 })
-export class BuscarViajePage {
+export class BuscarViajePage implements OnInit {
 
-  viajes = [];
+  viajes: Viaje[] = [];
   firebaseSrv = inject(FirebaseService);
   utilsSrv = inject(UtilsService);
 
   constructor(private router: Router) { }
 
-  unirseAlViaje(trip: any) {
-    this.router.navigate(['/viaje-en-curso'], { state: { trip } });
+  unirseAlViaje(viaje: Viaje) {
+    const navigationExtras: NavigationExtras = { state: { viaje: viaje } };
+    console.log(navigationExtras)
+    this.router.navigate(['/detalle-viaje'], navigationExtras);
   }
 
   async ngOnInit() {
