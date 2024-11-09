@@ -1,10 +1,10 @@
 import { DatetimeChangeEventDetail } from "@ionic/angular";
 
 export enum estadoViaje{
-    'pendiente',
-    'enCurso',
-    'cancelado',
-    'finalizado',
+    'pendiente'= 'pendiente',
+    'enCurso' = 'enCurso',
+    'cancelado' = 'cancelado',
+    'finalizado' = 'finalizado',
 }
 
 export interface Usuario {

@@ -15,7 +15,8 @@ export class CrearViajePage implements OnInit {
 
   formularioViaje!: FormGroup;
   usuarioActual: Usuario | null = null;
-  autoUsuario: Auto | null = null;
+  autos = []; // Lista de autos disponibles
+  autoSeleccionado: Auto | null = null; // Auto seleccionado
 
   firebaseSrv = inject(FirebaseService);
   utilsSrv = inject(UtilsService);
@@ -26,16 +27,24 @@ export class CrearViajePage implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void {
-    this.inicializarFormulario();
-    this.cargarUsuarioActual();
+  uid = '';
+
+  async ngOnInit(): Promise<void> {
+    await this.inicializarFormulario();
+    await this.cargarUsuarioActual();
+    this.uid = await this.localStorageSrv.get('sesion');
+    this.firebaseSrv.getCollectionChanges<Auto>('Auto').subscribe((autos) => {
+      console.log(this.uid);
+      this.autos = autos.filter((auto) => auto.propietario === `Usuario/${this.uid}`);
+    });
   }
 
   inicializarFormulario() {
     this.formularioViaje = this.formBuilder.group({
-      destino: ['', Validators.required],
+      destino: ['', Validators.required],  // Campo de destino, pero sin input en HTML
       fechaSalida: ['', Validators.required],
-      precio: [0, Validators.required]
+      precio: [0, Validators.required],
+      auto: [null, Validators.required] // Campo para el auto seleccionado
     });
   }
 
@@ -45,20 +54,6 @@ export class CrearViajePage implements OnInit {
       if (uid) {
         const pathUsuario = `Usuario/${uid}`;
         this.usuarioActual = await this.firebaseSrv.getDocument(pathUsuario) as Usuario;
-  
-        // Solo intenta cargar el auto si el usuario es conductor y el documento existe
-        if (this.usuarioActual?.esConductor) {
-          const pathAuto = `Autos/${uid}`;
-          this.autoUsuario = await this.firebaseSrv.getDocument(pathAuto) as Auto;
-          
-          // Verificación adicional: si no se encuentra el auto, establecer como null
-          if (!this.autoUsuario) {
-            console.warn('No se encontró un auto para el usuario');
-            this.autoUsuario = null;
-          }
-        } else {
-          this.autoUsuario = null; // Asegurar que se inicialice como null si no es conductor
-        }
       }
     } catch (error) {
       console.error('Error al cargar el usuario:', error);
@@ -71,30 +66,30 @@ export class CrearViajePage implements OnInit {
     }
   }
 
-  // Método para actualizar el campo destino con el valor seleccionado en el mapa
+  // Método para recibir el destino seleccionado del mapa
   onDestinoSeleccionado(destino: string): void {
-    this.formularioViaje.get('destino')?.setValue(destino);
+    this.formularioViaje.get('destino')?.setValue(destino);  // Guarda el destino seleccionado en el formulario
   }
 
   async crearViaje() {
     if (this.formularioViaje?.valid && this.usuarioActual) {
       const loading = await this.utilsSrv.loading();
       await loading.present();
-  
+
       const viaje: Viaje = {
         estado: estadoViaje.pendiente,
         piloto: this.usuarioActual,
         pasajeros: [],
-        destino: this.formularioViaje.value.destino,
+        destino: this.formularioViaje.value.destino,  // Usa el destino seleccionado del mapa
         fechaSalida: this.formularioViaje.value.fechaSalida,
-        auto: this.autoUsuario || null, // Usa null si autoUsuario está undefined
+        auto: this.formularioViaje.value.auto, // Guardar el auto seleccionado
         precio: this.formularioViaje.value.precio
       };
-  
+
       try {
         const path = `Viajes/${this.usuarioActual.uid}_${new Date().getTime()}`;
         await this.firebaseSrv.setDocument(path, viaje);
-  
+
         this.utilsSrv.presentToast({
           message: 'Viaje creado exitosamente',
           duration: 2500,
