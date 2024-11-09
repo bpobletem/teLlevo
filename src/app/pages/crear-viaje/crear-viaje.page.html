@@ -2,8 +2,6 @@
 
 <ion-content class="ion-padding">
   <form *ngIf="formularioViaje" [formGroup]="formularioViaje" (ngSubmit)="crearViaje()">
-
-    <!-- Selector de autos -->
     <ion-item class="ion-margin-end">
       <ion-label>Selecciona un auto</ion-label>
       <ion-select formControlName="auto" placeholder="Escoge uno">
@@ -28,6 +26,9 @@
     </ion-button>
   </form>
 
-  <!-- Integrar el componente del mapa y escuchar el evento destinoSeleccionado -->
-  <app-map (destinoSeleccionado)="onDestinoSeleccionado($event)"></app-map>
+  <div id="mapContainer" style="height: 400px; width: 100%;"></div>
+
+  <ion-button expand="block" color="secondary" (click)="addParada([-73.05, -36.78])">
+    Añadir Parada
+  </ion-button>
 </ion-content>

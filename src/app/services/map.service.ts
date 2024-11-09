@@ -18,6 +18,7 @@ export class MapService {
   zoom = 15;
   markerDriver: any = null;
   markerDestination: any = null;
+  stops: [number, number][] = []; // Lista de paradas adicionales
 
   constructor(private httpClient: HttpClient, private firestore: Firestore) {
     this.mapbox.accessToken = environment.mapKey;
@@ -52,8 +53,7 @@ export class MapService {
         // Manejar la selección de un resultado
         geocoder.on('result', (event) => {
           const destinationCoords = event.result.center;
-          this.addMarker(destinationCoords, 'destination');
-          this.loadRoute([this.lng, this.lat], destinationCoords);
+          this.onDestinoSeleccionado(event.result.place_name, destinationCoords);
         });
 
         resolve({ map: this.map, geocoder });
@@ -63,30 +63,33 @@ export class MapService {
     });
   }
 
-  addMarker(coords: [number, number], type: 'driver' | 'destination'): void {
+  addMarker(coords: [number, number], type: 'driver' | 'destination' | 'stop'): void {
+    const marker = new mapboxgl.Marker().setLngLat(coords).addTo(this.map);
     if (type === 'driver') {
-      if (!this.markerDriver) {
-        // Usa el marcador predeterminado de Mapbox para el punto de inicio
-        this.markerDriver = new mapboxgl.Marker()
-          .setLngLat(coords)
-          .addTo(this.map);
-      } else {
-        this.markerDriver.setLngLat(coords);
-      }
-    } else {
-      if (!this.markerDestination) {
-        // Usa el marcador predeterminado de Mapbox para el destino
-        this.markerDestination = new mapboxgl.Marker()
-          .setLngLat(coords)
-          .addTo(this.map);
-      } else {
-        this.markerDestination.setLngLat(coords);
-      }
+      this.markerDriver = marker;
+    } else if (type === 'destination') {
+      this.markerDestination = marker;
+      this.stops = [coords]; // Iniciar la lista de paradas con el primer destino
+    } else if (type === 'stop') {
+      this.stops.push(coords); // Agregar la parada a la lista de paradas
     }
   }
 
-  loadRoute(start: [number, number], end: [number, number]): void {
-    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?steps=true&geometries=geojson&access_token=${this.mapbox.accessToken}`;
+  onDestinoSeleccionado(destino: string, coords: [number, number]): void {
+    this.addMarker(coords, 'destination');
+    this.updateRoute(); // Recalcular la ruta incluyendo el destino inicial
+  }
+
+  addStop(coords: [number, number]): void {
+    this.addMarker(coords, 'stop');
+    this.updateRoute(); // Recalcular la ruta incluyendo la nueva parada
+  }
+
+  updateRoute(): void {
+    const allPoints = [[this.lng, this.lat], ...this.stops]; // Puntos de inicio, destino, y todas las paradas
+    const coordinatesString = allPoints.map(point => point.join(',')).join(';');
+
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinatesString}?steps=true&geometries=geojson&access_token=${this.mapbox.accessToken}`;
 
     this.httpClient.get(url).subscribe((res: any) => {
       if (res.routes && res.routes.length > 0) {
@@ -123,7 +126,7 @@ export class MapService {
           },
         });
 
-        this.map.fitBounds([start, end], {
+        this.map.fitBounds(route, {
           padding: 50,
         });
 

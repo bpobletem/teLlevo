@@ -5,6 +5,7 @@ import { Auto, Usuario, Viaje, estadoViaje } from 'src/app/interfaces/interfaces
 import { StorageService } from 'src/app/services/storage.service';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { UtilsService } from 'src/app/services/utils.service';
+import { MapService } from 'src/app/services/map.service'; // Importamos MapService
 
 @Component({
   selector: 'app-crear-viaje',
@@ -21,6 +22,7 @@ export class CrearViajePage implements OnInit {
   firebaseSrv = inject(FirebaseService);
   utilsSrv = inject(UtilsService);
   localStorageSrv = inject(StorageService);
+  mapService = inject(MapService); // Inyectamos MapService
 
   constructor(
     private formBuilder: FormBuilder,
@@ -37,15 +39,29 @@ export class CrearViajePage implements OnInit {
       console.log(this.uid);
       this.autos = autos.filter((auto) => auto.propietario === `Usuario/${this.uid}`);
     });
+
+    // Inicializamos el mapa
+    await this.mapService.buildMap('mapContainer');
   }
 
   inicializarFormulario() {
     this.formularioViaje = this.formBuilder.group({
-      destino: ['', Validators.required],  // Campo de destino, pero sin input en HTML
+      destino: ['', Validators.required],
       fechaSalida: ['', Validators.required],
       precio: [0, Validators.required],
       auto: [null, Validators.required] // Campo para el auto seleccionado
     });
+  }
+
+  async obtenerAutos() {
+    try {
+      const uid = await this.localStorageSrv.get('sesion');
+      const autos = await this.firebaseSrv.getDocumentsByReference(`Auto`, `propietario`, `Usuario/${uid}`);
+      this.autos = autos;  // Asignamos los autos obtenidos al array de autos
+      console.log('Autos:', this.autos);
+    } catch (error) {
+      console.error('Error al obtener los autos:', error);
+    }
   }
 
   async cargarUsuarioActual(): Promise<void> {
@@ -66,9 +82,13 @@ export class CrearViajePage implements OnInit {
     }
   }
 
-  // Método para recibir el destino seleccionado del mapa
-  onDestinoSeleccionado(destino: string): void {
-    this.formularioViaje.get('destino')?.setValue(destino);  // Guarda el destino seleccionado en el formulario
+  onDestinoSeleccionado(destino: string, coords: [number, number]): void {
+    this.formularioViaje.get('destino')?.setValue(destino);
+    this.mapService.onDestinoSeleccionado(destino, coords); // Llamamos a la función en MapService
+  }
+
+  addParada(coords: [number, number]): void {
+    this.mapService.addStop(coords); // Añadimos la parada y actualizamos la ruta
   }
 
   async crearViaje() {
@@ -80,7 +100,7 @@ export class CrearViajePage implements OnInit {
         estado: estadoViaje.pendiente,
         piloto: this.usuarioActual,
         pasajeros: [],
-        destino: this.formularioViaje.value.destino,  // Usa el destino seleccionado del mapa
+        destino: this.formularioViaje.value.destino,
         fechaSalida: this.formularioViaje.value.fechaSalida,
         auto: this.formularioViaje.value.auto, // Guardar el auto seleccionado
         precio: this.formularioViaje.value.precio
