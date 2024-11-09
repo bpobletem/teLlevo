@@ -1,20 +1,13 @@
 <app-encabezado titulo="Viaje"></app-encabezado>
 
 <ion-content class="ion-padding">
-  <img src="assets/ruta.png" alt="Mapa del viaje" (click)="seleccionarDestino($event)" />
+  <div class="map-container">
+    <app-map (destinoSeleccionado)="onDestinoSeleccionado($event)"></app-map>
+  </div>
 
-  <ng-container *ngIf="!esPiloto; else opcionesPiloto">
+  <ng-container>
     <ion-button expand="block" class="ion-margin" (click)="unirseAlViaje()">
-      Unirse al viaje
+      Solicitar unirse
     </ion-button>
   </ng-container>
-
-  <ng-template #opcionesPiloto>
-    <ion-button expand="block" class="ion-margin" (click)="aceptarPasajero()">
-      Aceptar Pasajero
-    </ion-button>
-    <ion-button expand="block"  class="ion-margin" (click)="rechazarPasajero()">
-      Rechazar Pasajero
-    </ion-button>
-  </ng-template>
 </ion-content>

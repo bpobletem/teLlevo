@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-detalle-viaje',
@@ -10,30 +11,38 @@ import { Router } from '@angular/router';
 export class DetalleViajePage implements OnInit {
 
   destino: string = '';
-  esPiloto: boolean = false;
-  pasajero: any;
+  formularioViaje!: FormGroup;
+  formBuilder: any;
 
-  constructor(private alertController: AlertController, private router: Router) { }
+  constructor(private alertController: AlertController, private router: Router) {
+
+   }
 
   ngOnInit() {
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation && navigation.extras.state) {
-      this.esPiloto = navigation.extras.state['piloto'];
-      this.pasajero = navigation.extras.state['solicitud'];
-    }
+    this.inicializarFormulario();
   }
 
   seleccionarDestino(event: MouseEvent) {
     const x = event.clientX;
     const y = event.clientY;
-    this.destino = `(${x}, ${y})`; // Simula las coordenadas donde el usuario hizo clic.
+    this.destino = `(${x}, ${y})`;
     console.log('Destino seleccionado:', this.destino);
+  }
+
+  inicializarFormulario() {
+    this.formularioViaje = this.formBuilder.group({
+      destino: ['', Validators.required],
+    });
+  }
+
+  onDestinoSeleccionado(destino: string): void {
+    this.formularioViaje.get('destino')?.setValue(destino);  // Guarda el destino seleccionado en el formulario
   }
 
   async unirseAlViaje() {
     const alert = await this.alertController.create({
       header: 'Solicitud de viaje',
-      message: `Tu destino ha sido marcado en ${this.destino}. ¿Deseas confirmar unirte al viaje?`,
+      message: `¿Deseas confirmar unirte al viaje?`,
       buttons: [
         {
           text: 'Cancelar',
@@ -42,46 +51,15 @@ export class DetalleViajePage implements OnInit {
         {
           text: 'Confirmar',
           handler: () => {
+            //aqui hay que agregar al usuario al array de pasajeros del viaje
             console.log('Solicitud confirmada');
+            this.router.navigate(['/historial-viajes']);
           }
         }
       ]
     });
-
     await alert.present();
   }
 
-  async aceptarPasajero() {
-    const alert = await this.alertController.create({
-      header: 'Pasajero aceptado',
-      message: `Haz aceptado a ${this.pasajero.nombre} a tu viaje.`,
-      buttons: [
-        {
-          text: 'OK',
-          handler: () => {
-            this.router.navigate(['/solicitudes-de-viaje']);
-          }
-        }
-      ]
-    });
-
-    await alert.present();
-  }
-
-  async rechazarPasajero() {
-    const alert = await this.alertController.create({
-      header: 'Pasajero rechazado',
-      message: `Haz rechazado a ${this.pasajero.nombre}.`,
-      buttons: [
-        {
-          text: 'OK',
-          handler: () => {
-            this.router.navigate(['/solicitudes-de-viaje']);
-          }
-        }
-      ]
-    });
-
-    await alert.present();
-  }
+  
 }
