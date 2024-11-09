@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { authGuard } from './guards/auth.guard';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   {
     path: 'home',
-    canActivate: [authGuard],
+    canActivate: [AuthGuard],
     loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
   },
   {
@@ -31,7 +31,7 @@ const routes: Routes = [
   },
   {
     path: 'perfil',
-    canActivate: [authGuard],
+    canActivate: [AuthGuard],
     loadChildren: () => import('./pages/perfil/perfil.module').then( m => m.PerfilPageModule)
   },
   {
@@ -44,7 +44,7 @@ const routes: Routes = [
   },
   {
     path: 'historial-viajes',
-    canActivate: [authGuard],
+    canActivate: [AuthGuard],
     loadChildren: () => import('./pages/historial-viajes/historial-viajes.module').then( m => m.HistorialViajesPageModule)
   },
   {

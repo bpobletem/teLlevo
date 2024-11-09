@@ -1,7 +1,7 @@
 <app-encabezado titulo="Autos Registrados"></app-encabezado>
 
 <ion-content class="ion-padding">
-  <ion-list>
+  <ion-list *ngIf="autos.length > 0">
     <ion-item *ngFor="let auto of autos" class="ion-margin-end">
       <ion-label>
         <h2>Marca: {{ auto.marca }}</h2>
@@ -12,6 +12,11 @@
         Eliminar
       </ion-button>
     </ion-item>
+  </ion-list>
+  <ion-list *ngIf="autos.length <= 0">
+    <ion-text color="secondary" class="ion-text-center">
+      <h3>No tienes autos registrados 🥺</h3>
+    </ion-text>
   </ion-list>
   <ion-fab slot="fixed" vertical="bottom" horizontal="end" class="ion-margin">
     <ion-fab-button (click)="navigateToRegistrarAuto()">

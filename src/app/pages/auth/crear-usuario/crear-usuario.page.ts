@@ -25,7 +25,7 @@ export class CrearUsuarioPage implements OnInit {
     marca: '',
     modelo: '',
     patente: '',
-    propietario: this.usuario
+    propietario: ''
   };
 
   registrarForm: FormGroup;
@@ -120,7 +120,7 @@ export class CrearUsuarioPage implements OnInit {
 
   async saveAuto(uid: string) {
     if (this.autoForm.valid) {
-      let path = `Auto/${uid}`;
+      let path = `Auto/${this.autoForm.value.patente}`;
       await this.firebaseSrv.setDocument(path, this.autoForm.value)
         .then(() => {
           this.autoForm.reset();
