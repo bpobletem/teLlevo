@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { Viaje, estadoViaje } from 'src/app/interfaces/interfaces';
+import { FirebaseService } from 'src/app/services/firebase.service';
+import { UtilsService } from 'src/app/services/utils.service';
 
 @Component({
   selector: 'app-buscar-viaje',
@@ -8,16 +11,30 @@ import { Router } from '@angular/router';
 })
 export class BuscarViajePage {
 
-  trips = [
-    { id: '1', driverName: 'Alice', startLocation: 'Duoc', destination: 'Mall', departureTime: '08:00 AM', availableSeats: 3, price: '3000' },
-    { id: '2', driverName: 'Bob', startLocation: 'Universidad', destination: 'Centro', departureTime: '08:15 AM', availableSeats: 2, price: '3000' },
-    { id: '3', driverName: 'Charlie', startLocation: 'Casa', destination: 'Oficina', departureTime: '08:30 AM', availableSeats: 4, price: '3000' },
-    { id: '4', driverName: 'Daniel', startLocation: 'Plaza', destination: 'Higueras', departureTime: '07:45 AM', availableSeats: 1, price: '3000' },
-  ];
+  viajes = [];
+  firebaseSrv = inject(FirebaseService);
+  utilsSrv = inject(UtilsService);
 
   constructor(private router: Router) { }
 
   unirseAlViaje(trip: any) {
     this.router.navigate(['/viaje-en-curso'], { state: { trip } });
+  }
+
+  async ngOnInit() {
+    const loading = await this.utilsSrv.loading();
+    await loading.present();
+    try {
+      this.firebaseSrv.getCollectionChanges<Viaje>('Viajes').subscribe((viaje) => {
+        this.viajes = viaje.filter((viaje) => viaje.estado === estadoViaje.pendiente);
+        loading.dismiss();
+      }, (error) => {
+        console.error('Error al obtener los viajes:', error);
+        loading.dismiss();
+      });
+    } catch (error) {
+      console.error('Error al inicializar:', error);
+      loading.dismiss();
+    }
   }
 }

@@ -1,14 +1,12 @@
 <app-encabezado titulo="Buscar viaje"></app-encabezado>
 
 <ion-content class="ion-padding">
-  <ion-list *ngIf="trips.length > 0; else noTrips">
+  <ion-list *ngIf="viajes.length > 0; else noTrips">
     <ion-searchbar placeholder="Destino"></ion-searchbar>
-    <ion-item *ngFor="let trip of trips" class="ion-margin-end" routerLink="/detalle-viaje">
+    <ion-item *ngFor="let viaje of viajes" class="ion-margin-end" routerLink="/detalle-viaje">
       <ion-label>
-        <h2>{{ trip.driverName }} - {{ trip.destination }}</h2>
-        <p>Hora de salida: {{ trip.departureTime }}</p>
-        <p>Asientos disponibles: {{ trip.availableSeats }}</p>
-        <p>Precio: ${{ trip.price }}</p>
+        {{viaje.destino}}
+        <p>Precio: ${{ viaje.precio }}</p>
       </ion-label>
     </ion-item>
   </ion-list>
