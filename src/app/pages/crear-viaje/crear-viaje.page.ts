@@ -45,10 +45,19 @@ export class CrearViajePage implements OnInit {
       if (uid) {
         const pathUsuario = `Usuario/${uid}`;
         this.usuarioActual = await this.firebaseSrv.getDocument(pathUsuario) as Usuario;
-
+  
+        // Solo intenta cargar el auto si el usuario es conductor y el documento existe
         if (this.usuarioActual?.esConductor) {
           const pathAuto = `Autos/${uid}`;
           this.autoUsuario = await this.firebaseSrv.getDocument(pathAuto) as Auto;
+          
+          // Verificación adicional: si no se encuentra el auto, establecer como null
+          if (!this.autoUsuario) {
+            console.warn('No se encontró un auto para el usuario');
+            this.autoUsuario = null;
+          }
+        } else {
+          this.autoUsuario = null; // Asegurar que se inicialice como null si no es conductor
         }
       }
     } catch (error) {
@@ -71,21 +80,21 @@ export class CrearViajePage implements OnInit {
     if (this.formularioViaje?.valid && this.usuarioActual) {
       const loading = await this.utilsSrv.loading();
       await loading.present();
-
+  
       const viaje: Viaje = {
         estado: estadoViaje.pendiente,
         piloto: this.usuarioActual,
         pasajeros: [],
         destino: this.formularioViaje.value.destino,
         fechaSalida: this.formularioViaje.value.fechaSalida,
-        auto: this.autoUsuario,
+        auto: this.autoUsuario || null, // Usa null si autoUsuario está undefined
         precio: this.formularioViaje.value.precio
       };
-
+  
       try {
         const path = `Viajes/${this.usuarioActual.uid}_${new Date().getTime()}`;
         await this.firebaseSrv.setDocument(path, viaje);
-
+  
         this.utilsSrv.presentToast({
           message: 'Viaje creado exitosamente',
           duration: 2500,
@@ -103,7 +112,7 @@ export class CrearViajePage implements OnInit {
           position: 'bottom',
           icon: 'alert-circle-outline'
         });
-        console.error(error);
+        console.error('Error al guardar el documento en Firestore:', error);
       } finally {
         loading.dismiss();
       }
