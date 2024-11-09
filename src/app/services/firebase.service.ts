@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { collection, collectionData, doc, Firestore, setDoc, getFirestore, getDoc, query, where, getDocs } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { Auth, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from '@angular/fire/auth';
+import { Auth, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail, onAuthStateChanged } from '@angular/fire/auth';
 import { Usuario } from '../interfaces/interfaces';
 import { StorageService } from './storage.service';
 import { Router } from '@angular/router';
@@ -11,11 +11,11 @@ import { Router } from '@angular/router';
 })
 
 export class FirebaseService {
-  firestore: Firestore = inject(Firestore)
   auth = inject(Auth)
-  storageSrv = inject(StorageService);
-  router = inject(Router);
-  constructor() { }
+
+  constructor(private firestore: Firestore, private router: Router, private storageSrv: StorageService) {
+    this.auth = getAuth();
+  }
 
 
   // auth
@@ -39,6 +39,24 @@ export class FirebaseService {
     getAuth().signOut();
     this.storageSrv.remove('sesion');
     this.router.navigate(['/iniciar-sesion']);
+  }
+
+  async checkAndClearSession(): Promise<boolean> {
+    return new Promise<boolean>(async (resolve) => {
+      // Verifica el estado de autenticación en Firebase
+      onAuthStateChanged(this.auth, async (user) => {
+        const storedSession = await this.storageSrv.get('sesion');
+        
+        if (user && storedSession) {
+          // Si hay un usuario en Firebase y en el storage, la sesión está activa
+          resolve(true);
+        } else {
+          // Si no hay usuario en Firebase o el UID no está en el storage, cierra sesión
+          await this.storageSrv.remove('sesion');
+          resolve(false);
+        }
+      });
+    });
   }
 
   // db
@@ -69,3 +87,4 @@ export class FirebaseService {
   
 
 }
+ 
