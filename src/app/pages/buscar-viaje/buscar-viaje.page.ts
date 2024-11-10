@@ -29,14 +29,10 @@ export class BuscarViajePage implements OnInit {
     try {
       this.firebaseSrv.getCollectionChanges<Viaje>('Viajes').subscribe((viaje) => {
         this.viajes = viaje.filter((viaje) => viaje.estado === estadoViaje.pendiente);
-        loading.dismiss();
-      }, (error) => {
-        console.error('Error al obtener los viajes:', error);
-        loading.dismiss();
       });
     } catch (error) {
-      console.error('Error al inicializar:', error);
-      loading.dismiss();
+      console.error('Error al obtener los autos:', error);
     }
+    loading.dismiss();
   }
 }
