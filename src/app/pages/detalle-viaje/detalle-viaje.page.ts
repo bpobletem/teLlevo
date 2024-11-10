@@ -24,17 +24,17 @@ export class DetalleViajePage implements OnInit {
   constructor(
     private alertController: AlertController,
     private router: Router,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private route: ActivatedRoute,
   ) {}
 
   async ngOnInit() {
-    this.pasajeroId = await this.storageSrv.get('sesion');
-    if (this.router.getCurrentNavigation()?.extras.state) {
-      let extras = this.router.getCurrentNavigation()?.extras.state;
-      this.viaje = extras['viaje'] ;
-      this.viajeId = this.viaje.id;
-    }
-
+    this.route.queryParams.subscribe(params => {
+      if (this.router.getCurrentNavigation()?.extras.state) {
+        this.viaje = this.router.getCurrentNavigation()?.extras.state['viaje'];
+        this.viajeId = this.viaje.id;
+      }
+    });
     this.inicializarFormulario();
   }
 
