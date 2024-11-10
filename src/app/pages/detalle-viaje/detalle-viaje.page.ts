@@ -12,31 +12,41 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class DetalleViajePage implements OnInit {
 
-  destino: string = '';
   formularioViaje!: FormGroup;
   firebaseSrv = inject(FirebaseService);
   storageSrv = inject(StorageService);
-
+  
   viaje: any = {};
+  destino: string = '';
   pasajeroId: string = '';
   viajeId: string = '';
 
   constructor(
     private alertController: AlertController,
     private router: Router,
-    private formBuilder: FormBuilder,
     private route: ActivatedRoute,
+    private formBuilder: FormBuilder
   ) {}
 
   async ngOnInit() {
-    this.pasajeroId = await this.storageSrv.get('sesion');
+   
+    
+
     this.route.queryParams.subscribe(params => {
-      if (this.router.getCurrentNavigation()?.extras.state) {
-        this.viaje = this.router.getCurrentNavigation()?.extras.state['viaje'];
+      const navigation = this.router.getCurrentNavigation()?.extras.state;
+      if (navigation !== undefined) {
+        this.viaje = navigation['viaje'];
         this.viajeId = this.viaje.id;
-        console.log(this.viajeId);
+        console.log('Viaje ID:', this.viajeId);
+      } else {
+        console.error('No navigation state found');
       }
     });
+    await this.firebaseSrv.checkAndClearSession();
+
+    this.pasajeroId = await this.storageSrv.get('sesion');
+    console.log('Pasajero ID:', this.pasajeroId);
+
     this.inicializarFormulario();
   }
 
@@ -74,6 +84,7 @@ export class DetalleViajePage implements OnInit {
         },
       ],
     });
+
     await alert.present();
   }
 
@@ -81,13 +92,11 @@ export class DetalleViajePage implements OnInit {
     try {
       await this.firebaseSrv.setDocument(`SolicitudesViaje/${viajeId + pasajeroId}`, {
         viajeId: viajeId,
+        destino: this.formularioViaje.get('destino').value,
         pasajeroId: pasajeroId,
-        destino: this.formularioViaje.get('destino')?.value,
-        estado: 'pendiente',
+        estado: 'pendiente'
       })
       console.log('Solicitud de unión enviada.');
-      //redirigimos a buscar viaje mientras se implementa la funcionalidad de solicitudes
-      this.router.navigate(['/buscar-viaje']);
     } catch (error) {
       console.error('Error al enviar la solicitud:', error);
     }
