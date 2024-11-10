@@ -29,10 +29,12 @@ export class DetalleViajePage implements OnInit {
   ) {}
 
   async ngOnInit() {
+    this.pasajeroId = await this.storageSrv.get('sesion');
     this.route.queryParams.subscribe(params => {
       if (this.router.getCurrentNavigation()?.extras.state) {
         this.viaje = this.router.getCurrentNavigation()?.extras.state['viaje'];
         this.viajeId = this.viaje.id;
+        console.log(this.viajeId);
       }
     });
     this.inicializarFormulario();
@@ -67,7 +69,7 @@ export class DetalleViajePage implements OnInit {
         {
           text: 'Confirmar',
           handler: () => {
-            console.log('confirmadooo')
+            this.solicitarUnirseAlViaje(this.viajeId, this.pasajeroId);
           },
         },
       ],
@@ -80,9 +82,12 @@ export class DetalleViajePage implements OnInit {
       await this.firebaseSrv.setDocument(`SolicitudesViaje/${viajeId + pasajeroId}`, {
         viajeId: viajeId,
         pasajeroId: pasajeroId,
-        estado: 'pendiente'
+        destino: this.formularioViaje.get('destino')?.value,
+        estado: 'pendiente',
       })
       console.log('Solicitud de unión enviada.');
+      //redirigimos a buscar viaje mientras se implementa la funcionalidad de solicitudes
+      this.router.navigate(['/buscar-viaje']);
     } catch (error) {
       console.error('Error al enviar la solicitud:', error);
     }
