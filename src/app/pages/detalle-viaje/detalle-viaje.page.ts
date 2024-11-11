@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AlertController } from '@ionic/angular';
-import { Router } from '@angular/router';
-import { FormGroup, Validators } from '@angular/forms';
+import { FirebaseService } from '../../services/firebase.service';
+import { StorageService } from '../../services/storage.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-detalle-viaje',
@@ -10,15 +12,41 @@ import { FormGroup, Validators } from '@angular/forms';
 })
 export class DetalleViajePage implements OnInit {
 
-  destino: string = '';
   formularioViaje!: FormGroup;
-  formBuilder: any;
+  firebaseSrv = inject(FirebaseService);
+  storageSrv = inject(StorageService);
+  
+  viaje: any = {};
+  destino: string = '';
+  pasajeroId: string = '';
+  viajeId: string = '';
 
-  constructor(private alertController: AlertController, private router: Router) {
+  constructor(
+    private alertController: AlertController,
+    private router: Router,
+    private route: ActivatedRoute,
+    private formBuilder: FormBuilder
+  ) {}
 
-   }
+  async ngOnInit() {
+   
+    
 
-  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      const navigation = this.router.getCurrentNavigation()?.extras.state;
+      if (navigation !== undefined) {
+        this.viaje = navigation['viaje'];
+        this.viajeId = this.viaje.id;
+        console.log('Viaje ID:', this.viajeId);
+      } else {
+        console.error('No navigation state found');
+      }
+    });
+    await this.firebaseSrv.checkAndClearSession();
+
+    this.pasajeroId = await this.storageSrv.get('sesion');
+    console.log('Pasajero ID:', this.pasajeroId);
+
     this.inicializarFormulario();
   }
 
@@ -51,15 +79,26 @@ export class DetalleViajePage implements OnInit {
         {
           text: 'Confirmar',
           handler: () => {
-            //aqui hay que agregar al usuario al array de pasajeros del viaje
-            console.log('Solicitud confirmada');
-            this.router.navigate(['/historial-viajes']);
-          }
-        }
-      ]
+            this.solicitarUnirseAlViaje(this.viajeId, this.pasajeroId);
+          },
+        },
+      ],
     });
+
     await alert.present();
   }
 
-  
+  async solicitarUnirseAlViaje(viajeId: string, pasajeroId: string) {
+    try {
+      await this.firebaseSrv.setDocument(`SolicitudesViaje/${viajeId + pasajeroId}`, {
+        viajeId: viajeId,
+        destino: this.formularioViaje.get('destino').value,
+        pasajeroId: pasajeroId,
+        estado: 'pendiente'
+      })
+      console.log('Solicitud de unión enviada.');
+    } catch (error) {
+      console.error('Error al enviar la solicitud:', error);
+    }
+  }
 }

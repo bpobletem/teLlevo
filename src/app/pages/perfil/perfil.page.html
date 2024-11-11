@@ -4,8 +4,8 @@
   <ion-list>
     <ion-item class="ion-margin-end ion-text-center">
       <ion-label *ngIf="currentUser">
-        <h3>{{ currentUser.nombre }} {{ currentUser.apellido }}</h3>
-        <p>Correo: {{ currentUser.correo }}</p>
+        <h1>{{ currentUser.nombre }} {{ currentUser.apellido }}</h1>
+        <p>{{ currentUser.correo }}</p>
       </ion-label>
     </ion-item>
     <ion-item class="ion-margin-end" routerLink="/editar-perfil">

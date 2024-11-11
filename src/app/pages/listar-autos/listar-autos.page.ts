@@ -30,17 +30,6 @@ export class ListarAutosPage implements OnInit {
     });
   }
 
-  // Función para obtener los autos de Firebase
-  async obtenerAutos() {
-    try {
-      const uid = await this.storageSrv.get('sesion');
-      const autos = await this.firebaseSrv.getDocumentsByReference(`Auto`, `propietario`, `Usuario/${uid}`);
-      this.autos = autos;  // Asignamos los autos obtenidos al array de autos
-      console.log('Autos:', this.autos);
-    } catch (error) {
-      console.error('Error al obtener los autos:', error);
-    }
-  }
 
   // Confirmar eliminación de auto
   async confirmarEliminar(auto: any) {
@@ -74,6 +63,7 @@ export class ListarAutosPage implements OnInit {
 
   // Eliminar auto de la lista
   eliminarAuto(auto: any) {
+    //esto no funciona
     this.autos = this.autos.filter(a => a !== auto);
     console.log('Auto eliminado:', auto);
   }

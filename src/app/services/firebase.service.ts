@@ -60,9 +60,9 @@ export class FirebaseService {
   }
 
   // db
-  getCollectionChanges<tipo>(path: string) {
+  getCollectionChanges<T>(path: string): Observable<T[]> {
     const itemCollection = collection(this.firestore, path);
-    return collectionData(itemCollection) as Observable<tipo[]>;
+    return collectionData(itemCollection, { idField: 'id' }) as Observable<T[]>;
   }
 
   async getDocument(path: string) {
