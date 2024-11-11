@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-encabezado',
@@ -7,11 +8,13 @@ import { Router } from '@angular/router';
   styleUrls: ['./encabezado.component.scss'],
 })
 export class EncabezadoComponent  implements OnInit {
-  isLoggedIn = false;
 
   @Input() titulo="";
-  constructor(private router: Router) { }
+  constructor(private location: Location) {}
 
+  goBack() {
+    this.location.back();
+  }
   ngOnInit() {
   }
 }
