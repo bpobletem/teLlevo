@@ -1,11 +1,35 @@
 <app-encabezado titulo="Solicitudes de Viaje"></app-encabezado>
 <ion-content class="ion-padding">
-  <ion-list>
+  <ion-list *ngIf="solicitudes.length > 0; else noSolicitudes">
     <ion-item *ngFor="let solicitud of solicitudes">
       <ion-label>
-        <p>Parada: {{ solicitud.parada }}</p> <!-- Campo de parada confirmado -->
-        <p>Estado: {{ solicitud.estado }}</p>
+        <p>Parada: {{ solicitud.parada }}</p> <!-- Displaying the stop requested -->
+        <p>Estado: {{ solicitud.estado }}</p> <!-- Displaying the status of the request -->
       </ion-label>
+      <ion-buttons slot="end">
+        <!-- Accept Button -->
+        <ion-button color="success" (click)="aceptarSolicitud(solicitud)">
+          Aceptar
+        </ion-button>
+        <!-- Reject Button -->
+        <ion-button color="danger" (click)="rechazarSolicitud(solicitud)">
+          Rechazar
+        </ion-button>
+      </ion-buttons>
     </ion-item>
   </ion-list>
+
+  <!-- Display this message if there are no requests -->
+  <ng-template #noSolicitudes>
+    <div class="ion-text-center">
+      <p>No hay solicitudes aún</p>
+    </div>
+  </ng-template>
+
+  <!-- Start Journey button -->
+  <div class="ion-padding">
+    <ion-button expand="block" color="primary">
+      Iniciar Viaje
+    </ion-button>
+  </div>
 </ion-content>

@@ -146,4 +146,21 @@ export class MapService {
       this.map.removeSource('route');
     }
   }
+
+  async getCoordsFromAddress(address: string): Promise<[number, number]> {
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${this.mapbox.accessToken}`;
+    
+    try {
+      const response = await this.httpClient.get<any>(url).toPromise();
+      if (response.features && response.features.length > 0) {
+        const [lng, lat] = response.features[0].center;
+        return [lng, lat];
+      } else {
+        throw new Error('No coordinates found for the given address');
+      }
+    } catch (error) {
+      console.error('Error obtaining coordinates from address:', error);
+      throw error;
+    }
+  }
 }

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { collection, collectionData, doc, Firestore, setDoc, getFirestore, getDoc, query, where, getDocs } from '@angular/fire/firestore';
+import { collection, collectionData, doc, Firestore, setDoc, getFirestore, getDoc, query, where, getDocs, arrayUnion, updateDoc  } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Auth, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail, onAuthStateChanged } from '@angular/fire/auth';
 import { Usuario } from '../interfaces/interfaces';
@@ -89,5 +89,12 @@ export class FirebaseService {
     return setDoc(documentRef, data, { merge: true });
   }  
 
+  async addPassengerToArray(viajeId: string, passenger: any): Promise<void> {
+    const viajeRef = doc(this.firestore, `Viajes/${viajeId}`);
+    await updateDoc(viajeRef, {
+      pasajeros: arrayUnion(passenger)
+    });
+  }
+  
 }
  

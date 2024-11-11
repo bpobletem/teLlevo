@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { SolicitudesViaje } from 'src/app/interfaces/interfaces';
+import { MapService } from 'src/app/services/map.service';
 
 @Component({
   selector: 'app-solicitudes-viaje',
@@ -9,11 +10,15 @@ import { SolicitudesViaje } from 'src/app/interfaces/interfaces';
   styleUrls: ['./solicitudes-de-viaje.page.scss'],
 })
 export class SolicitudesDeViajePage implements OnInit {
-
   viajeId: string = '';
   solicitudes: SolicitudesViaje[] = [];
 
-  constructor(private router: Router, private route: ActivatedRoute, private firebaseSrv: FirebaseService) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private firebaseSrv: FirebaseService,
+    private mapService: MapService // Inject MapService
+  ) {}
 
   ngOnInit() {
     const navigation = this.router.getCurrentNavigation()?.extras.state;
@@ -28,7 +33,7 @@ export class SolicitudesDeViajePage implements OnInit {
 
   cargarSolicitudes() {
     this.firebaseSrv.getCollectionChanges<SolicitudesViaje>('SolicitudesViajes').subscribe((solicitudes) => {
-      console.log('Todas las solicitudes obtenidas:', solicitudes); // Verifica el contenido completo de las solicitudes obtenidas
+      console.log('Todas las solicitudes obtenidas:', solicitudes);
       
       this.solicitudes = solicitudes.filter(solicitud => {
         console.log('Comparando viajeId:', solicitud.viajeId, 'con', this.viajeId);
@@ -38,5 +43,44 @@ export class SolicitudesDeViajePage implements OnInit {
       console.log('Solicitudes filtradas:', this.solicitudes);
     });
   }
-  
+
+  async aceptarSolicitud(solicitud: SolicitudesViaje) {
+    try {
+      // Convert the 'parada' address to coordinates
+      const coords = await this.mapService.getCoordsFromAddress(solicitud.parada);
+      if (coords) {
+        // Add the stop to the route in MapService
+        this.mapService.addStop(coords, this.viajeId);
+
+        // Update the solicitud status to 'aceptado'
+        await this.firebaseSrv.updateDocument(`SolicitudesViajes/${solicitud.viajeId + solicitud.pasajeroId}`, {
+          estado: 'aceptado'
+        });
+
+        // Add the passenger to viaje's 'pasajeros' array
+        await this.firebaseSrv.addPassengerToArray(this.viajeId, solicitud.pasajeroId);
+
+        console.log('Solicitud aceptada y parada añadida:', coords);
+      } else {
+        console.error('Error al obtener coordenadas para la parada');
+      }
+    } catch (error) {
+      console.error('Error al aceptar la solicitud:', error);
+    }
+  }
+
+  async rechazarSolicitud(solicitud: SolicitudesViaje) {
+    try {
+      // Update the solicitud status to 'rechazado' in Firebase
+      await this.firebaseSrv.updateDocument(`SolicitudesViajes/${solicitud.viajeId + solicitud.pasajeroId}`, {
+        estado: 'rechazado'
+      });
+      console.log('Solicitud rechazada');
+
+      // Remove the rejected request from the displayed list
+      this.solicitudes = this.solicitudes.filter(s => s !== solicitud);
+    } catch (error) {
+      console.error('Error al rechazar la solicitud:', error);
+    }
+  }
 }
