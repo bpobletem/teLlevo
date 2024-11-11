@@ -18,9 +18,12 @@ export class BuscarViajePage implements OnInit {
   constructor(private router: Router) { }
 
   unirseAlViaje(viaje: Viaje) {
-    const navigationExtras: NavigationExtras = { state: { viaje: viaje } };
-    console.log(navigationExtras)
-    this.router.navigate(['/detalle-viaje'], navigationExtras);
+    if (viaje.id) { // Verificación de existencia de ID antes de navegar
+      const navigationExtras: NavigationExtras = { state: { viaje: viaje } };
+      this.router.navigate(['/detalle-viaje'], navigationExtras);
+    } else {
+      console.error('No se pudo encontrar el ID del viaje');
+    }
   }
 
   async ngOnInit() {

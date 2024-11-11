@@ -1,14 +1,18 @@
-import { DatetimeChangeEventDetail } from "@ionic/angular";
+export enum estadoViaje {
+    pendiente = 'pendiente',
+    enCurso = 'enCurso',
+    cancelado = 'cancelado',
+    finalizado = 'finalizado',
+}
 
-export enum estadoViaje{
-    'pendiente'= 'pendiente',
-    'enCurso' = 'enCurso',
-    'cancelado' = 'cancelado',
-    'finalizado' = 'finalizado',
+export enum EstadoSolicitud {
+    pendiente = 'pendiente',
+    aprobado = 'aprobado',
+    rechazado = 'rechazado',
 }
 
 export interface Usuario {
-    uid: string
+    uid: string;
     correo: string;
     nombre: string;
     apellido: string;
@@ -17,18 +21,26 @@ export interface Usuario {
 }
 
 export interface Viaje {
-    estado: estadoViaje;
-    piloto: Usuario;
-    pasajeros: Usuario[];
-    destino: string;
-    fechaSalida: string;
-    auto: Auto;
-    precio: number;
+    id?: string;              
+    estado: estadoViaje; 
+    piloto: Usuario;            
+    pasajeros: Usuario[];        
+    destino: string;             
+    fechaSalida: string;        
+    auto: Auto;            
+    precio: number;             
 }
 
 export interface Auto {
     marca: string;
     modelo: string;
     patente: string;
-    propietario: string; //uid del usuario como referencia
+    propietario: string; 
+}
+
+export interface SolicitudesViaje {
+    viajeId: string;            
+    parada: string;             
+    pasajeroId: string;         
+    estado: EstadoSolicitud;    
 }

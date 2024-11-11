@@ -1,29 +1,42 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { FirebaseService } from 'src/app/services/firebase.service';
+import { SolicitudesViaje } from 'src/app/interfaces/interfaces';
 
 @Component({
   selector: 'app-solicitudes-viaje',
   templateUrl: './solicitudes-de-viaje.page.html',
   styleUrls: ['./solicitudes-de-viaje.page.scss'],
 })
-export class SolicitudesDeViajePage {
+export class SolicitudesDeViajePage implements OnInit {
 
-  solicitudes = [
-    { id: 1, nombre: 'Carlos Muñoz', lugarInicio: 'Duoc', destino: 'Chiguayante', hora: '08:00 AM' },
-    { id: 2, nombre: 'Lucía Fernández', lugarInicio: 'Duoc', destino: 'Centro', hora: '08:15 AM' }
-  ];
+  viajeId: string = '';
+  solicitudes: SolicitudesViaje[] = [];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private route: ActivatedRoute, private firebaseSrv: FirebaseService) {}
 
-  verDetalleSolicitud(solicitud: any) {
-    this.router.navigate(['/detalle-viaje'], { state: { solicitud, piloto: true } });
+  ngOnInit() {
+    const navigation = this.router.getCurrentNavigation()?.extras.state;
+    if (navigation && navigation['viajeId']) {
+      this.viajeId = navigation['viajeId'];
+      console.log('Viaje ID recibido en SolicitudesDeViajePage:', this.viajeId);
+      this.cargarSolicitudes();
+    } else {
+      console.error('No se recibió el viajeId en NavigationExtras');
+    }
   }
 
-  comenzarViaje() {
-    this.router.navigate(['/viaje-en-curso'], { state: { piloto: true, trip: { startLocation: 'Duoc', destination: 'Mall', departureTime: '08:00 AM', availableSeats: 3, price: '3000', auto: 'Toyota Corolla' } } });
+  cargarSolicitudes() {
+    this.firebaseSrv.getCollectionChanges<SolicitudesViaje>('SolicitudesViajes').subscribe((solicitudes) => {
+      console.log('Todas las solicitudes obtenidas:', solicitudes); // Verifica el contenido completo de las solicitudes obtenidas
+      
+      this.solicitudes = solicitudes.filter(solicitud => {
+        console.log('Comparando viajeId:', solicitud.viajeId, 'con', this.viajeId);
+        return solicitud.viajeId === this.viajeId && solicitud.estado === 'pendiente';
+      });
+      
+      console.log('Solicitudes filtradas:', this.solicitudes);
+    });
   }
-
-  verHistorial() {
-    this.router.navigate(['/historial-viajes'], { state: { showPiloto: true } });
-  }
+  
 }

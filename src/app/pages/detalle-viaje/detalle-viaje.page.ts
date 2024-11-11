@@ -4,6 +4,7 @@ import { AlertController } from '@ionic/angular';
 import { FirebaseService } from '../../services/firebase.service';
 import { StorageService } from '../../services/storage.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MapService } from '../../services/map.service';
 
 @Component({
   selector: 'app-detalle-viaje',
@@ -15,9 +16,9 @@ export class DetalleViajePage implements OnInit {
   formularioViaje!: FormGroup;
   firebaseSrv = inject(FirebaseService);
   storageSrv = inject(StorageService);
-  
+  mapService = inject(MapService);
+
   viaje: any = {};
-  destino: string = '';
   pasajeroId: string = '';
   viajeId: string = '';
 
@@ -29,32 +30,26 @@ export class DetalleViajePage implements OnInit {
   ) {}
 
   async ngOnInit() {
-   
-    
+    this.inicializarFormulario();  // Asegúrate de inicializar el formulario aquí
 
-    this.route.queryParams.subscribe(params => {
-      const navigation = this.router.getCurrentNavigation()?.extras.state;
-      if (navigation !== undefined) {
-        this.viaje = navigation['viaje'];
-        this.viajeId = this.viaje.id;
-        console.log('Viaje ID:', this.viajeId);
-      } else {
-        console.error('No navigation state found');
-      }
-    });
+    const navigation = this.router.getCurrentNavigation();
+    if (navigation?.extras?.state && navigation.extras.state['viaje']) {
+      this.viaje = navigation.extras.state['viaje'];
+      this.viajeId = this.viaje.id || ''; 
+      console.log('Viaje ID recibido en DetalleViajePage:', this.viajeId);
+    } else {
+      console.error('No se recibió el objeto viaje en NavigationExtras');
+    }
+
     await this.firebaseSrv.checkAndClearSession();
-
     this.pasajeroId = await this.storageSrv.get('sesion');
     console.log('Pasajero ID:', this.pasajeroId);
 
-    this.inicializarFormulario();
-  }
+    this.mapService.cbAddress.subscribe((destino: string) => {
+      this.formularioViaje.get('destino')?.setValue(destino);
+    });
 
-  seleccionarDestino(event: MouseEvent) {
-    const x = event.clientX;
-    const y = event.clientY;
-    this.destino = `(${x}, ${y})`;
-    console.log('Destino seleccionado:', this.destino);
+    await this.mapService.buildMap('mapContainer');
   }
 
   inicializarFormulario() {
@@ -63,11 +58,17 @@ export class DetalleViajePage implements OnInit {
     });
   }
 
-  onDestinoSeleccionado(destino: string): void {
-    this.formularioViaje.get('destino')?.setValue(destino);  // Guarda el destino seleccionado en el formulario
-  }
-
   async unirseAlViaje() {
+    if (!this.formularioViaje.valid) {
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: 'Por favor, selecciona un destino antes de unirte al viaje.',
+        buttons: ['OK'],
+      });
+      await alert.present();
+      return;
+    }
+
     const alert = await this.alertController.create({
       header: 'Solicitud de viaje',
       message: `¿Deseas confirmar unirte al viaje?`,
@@ -90,15 +91,16 @@ export class DetalleViajePage implements OnInit {
 
   async solicitarUnirseAlViaje(viajeId: string, pasajeroId: string) {
     try {
-      await this.firebaseSrv.setDocument(`SolicitudesViaje/${viajeId + pasajeroId}`, {
+      await this.firebaseSrv.setDocument(`SolicitudesViajes/${viajeId + pasajeroId}`, {
         viajeId: viajeId,
-        destino: this.formularioViaje.get('destino').value,
+        parada: this.formularioViaje.get('destino')?.value,
         pasajeroId: pasajeroId,
         estado: 'pendiente'
-      })
-      console.log('Solicitud de unión enviada.');
+      });
+      console.log('Solicitud de unión enviada:', { viajeId, parada: this.formularioViaje.get('destino')?.value, pasajeroId });
     } catch (error) {
       console.error('Error al enviar la solicitud:', error);
     }
   }
+  
 }

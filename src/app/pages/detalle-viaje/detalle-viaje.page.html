@@ -1,13 +1,18 @@
 <app-encabezado titulo="Viaje"></app-encabezado>
 
 <ion-content class="ion-padding">
-  <div class="map-container">
-    <app-map (destinoSeleccionado)="onDestinoSeleccionado($event)"></app-map>
+  <div id="mapContainer" class="map-container" style="height: 400px; width: 100%;">
+    <app-map></app-map>
   </div>
 
-  <ng-container>
+  <form [formGroup]="formularioViaje"> <!-- Agrega esta línea -->
+    <ion-item>
+      <ion-label>Destino</ion-label>
+      <ion-input formControlName="destino"></ion-input>
+    </ion-item>
+
     <ion-button expand="block" class="ion-margin" (click)="unirseAlViaje()">
       Solicitar unirse
     </ion-button>
-  </ng-container>
+  </form> <!-- Cierra el formulario aquí -->
 </ion-content>

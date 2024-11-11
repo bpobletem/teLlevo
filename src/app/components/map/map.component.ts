@@ -13,10 +13,10 @@ export class MapComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.mapService.buildMap('map').then(({ geocoder }) => {
-      // Escuchar el evento del geocodificador y emitir el destino seleccionado
+      // Escuchar el evento del geocodificador y emitir el destino seleccionado si es necesario
       geocoder.on('result', (event) => {
         const destino = event.result.place_name;
-        this.destinoSeleccionado.emit(destino);
+        this.destinoSeleccionado.emit(destino); // Emitir solo si aún se necesita
       });
     }).catch(error => {
       console.error('Error al inicializar el mapa:', error);
