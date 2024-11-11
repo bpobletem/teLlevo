@@ -11,37 +11,30 @@
   </ion-segment>
 
   <ion-list *ngIf="isPiloto">
-    <ion-item *ngFor="let viaje of viajesPiloto">
+    <ion-item *ngFor="let viaje of viajesPiloto" class="ion-margin-end">
       <ion-label>
-        <h2>Destino: {{ viaje.lugarDestino }}
-          <ion-chip color="success">
-            <ion-label>Terminado</ion-label>
-          </ion-chip>
-        </h2>
-        <p>Fecha y Hora: {{ viaje.fechaHora }}</p>
-        <p>Pasajeros: {{ viaje.pasajeros }}</p>
-        <p>Auto: {{ viaje.auto }}</p>
+        <ion-chip [color]="getColorByEstado(viaje.estado)">
+          <ion-label>{{viaje.estado}}</ion-label>
+        </ion-chip>
+        <h2>Destino: {{ viaje.destino }}</h2>
+        <p>Fecha y Hora: {{ viaje.fecha }}</p>
+        <p>Pasajeros: {{ viaje.pasajeros.nombre }}</p>
+        <p>Auto: {{ viaje.auto.marca }}, {{ viaje.auto.modelo }}</p>
       </ion-label>
     </ion-item>
   </ion-list>
 
   <ion-list *ngIf="isPasajero">
-    <ion-item *ngFor="let viaje of viajesPasajero">
+    <ion-item *ngFor="let viaje of viajesPasajero" class="ion-margin-end">
       <ion-label>
-        <h2>Piloto: {{ viaje.piloto }}
-          <ion-chip color="success">
-            <ion-label>Terminado</ion-label>
-          </ion-chip>
-        </h2>
-        <p>Fecha y Hora: {{ viaje.fechaHora }}</p>
-        <p>Destino: {{ viaje.lugarDestino }}</p>
-        <p>Auto: {{ viaje.auto }}</p>
+        <ion-chip [color]="getColorByEstado(viaje.estado)">
+          <ion-label>{{viaje.estado}}</ion-label>
+        </ion-chip>
+        <h2>Piloto: {{ viaje.piloto }}</h2>
+        <p>Fecha y Hora: {{ viaje.fecha }}</p>
+        <p>Destino: {{ viaje.destino }}</p>
+        <p>Auto: {{ viaje.auto.marca }}, {{ viaje.auto.modelo }}</p>
       </ion-label>
     </ion-item>
   </ion-list>
 </ion-content>
-
-<!--  Primary = En curso
-      Tertiary = Proximo
-      Success = Terminado 
-      Danger = Cancelado -->

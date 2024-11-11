@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { FirebaseService } from 'src/app/services/firebase.service';
+import { StorageService } from 'src/app/services/storage.service';
 
 @Component({
   selector: 'app-historial-viajes',
@@ -8,29 +10,25 @@ import { Router } from '@angular/router';
 })
 export class HistorialViajesPage implements OnInit {
 
+  localStorageSrv = inject(StorageService);
+  firebaseSrv = inject(FirebaseService);
+
   isPiloto: boolean = true;
-  isPasajero: boolean = false;
+  isPasajero: boolean = true;
 
-  viajesPiloto = [
-    { piloto: 'Juan Pérez', fechaHora: '2024-09-25 14:00', lugarDestino: 'Mall', auto: 'Toyota Corolla', pasajeros: "Juan Perez, Wacoldo Soto" },
-    { piloto: 'Ana Torres', fechaHora: '2024-09-26 09:00', lugarDestino: 'Hospital Regional', auto: 'Honda Civic', pasajeros: "Juan Perez, Wacoldo Soto" },
-  ];
-
-  viajesPasajero = [
-    { piloto: 'Carlos Muñoz', fechaHora: '2024-09-24 18:00', lugarDestino: 'Mall', auto: 'Chevrolet Spark' },
-    { piloto: 'Lucía Fernández', fechaHora: '2024-09-27 12:00', lugarDestino: 'Hospital Regional', auto: 'Mazda 3' },
-  ];
+  viajesPiloto = [];
+  viajesPasajero = [];
 
   constructor(private router: Router) { }
 
-  ngOnInit() {
-    const nav = this.router.getCurrentNavigation();
-    const showPasajero = nav?.extras?.state?.['showPasajero'];
+  async ngOnInit() {
 
-    if (showPasajero) {
-      this.isPiloto = false;
-      this.isPasajero = true;
-    }
+    const userId = await this.localStorageSrv.get('sesion');
+    const viajes = await this.firebaseSrv.getDocumentsByPilotOrPassengerUid('Viajes', userId);
+    const {pilotResults, passengerResults} = viajes;
+    this.viajesPiloto = pilotResults;
+    this.viajesPasajero = passengerResults;
+    console.log(this.viajesPiloto);
   }
 
   showTrips(type: string) {
@@ -40,6 +38,21 @@ export class HistorialViajesPage implements OnInit {
     } else {
       this.isPiloto = false;
       this.isPasajero = true;
+    }
+  }
+
+  getColorByEstado(estado: string): string {
+    switch (estado) {
+      case 'en-curso':
+        return 'primary';
+      case 'pendiente':
+        return 'tertiary';
+      case 'terminado':
+        return 'success';
+      case 'cancelado':
+        return 'danger';
+      default:
+        return 'primary';
     }
   }
 }
