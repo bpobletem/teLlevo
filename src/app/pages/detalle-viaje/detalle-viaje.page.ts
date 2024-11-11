@@ -103,4 +103,5 @@ export class DetalleViajePage implements OnInit {
     }
   }
   
+  
 }

@@ -1,8 +1,8 @@
+<app-encabezado titulo="Solicitudes de Viaje"></app-encabezado>
 <ion-content class="ion-padding">
   <ion-list>
     <ion-item *ngFor="let solicitud of solicitudes">
       <ion-label>
-        <h2>Pasajero ID: {{ solicitud.pasajeroId }}</h2>
         <p>Parada: {{ solicitud.parada }}</p> <!-- Campo de parada confirmado -->
         <p>Estado: {{ solicitud.estado }}</p>
       </ion-label>

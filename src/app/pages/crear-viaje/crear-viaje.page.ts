@@ -77,61 +77,56 @@ export class CrearViajePage implements OnInit {
 
   async crearViaje() {
     if (this.formularioViaje.valid && this.usuarioActual) {
-        const loading = await this.utilsSrv.loading();
-        await loading.present();
-
-        const viaje: Viaje = {
-            estado: estadoViaje.pendiente,
-            piloto: this.usuarioActual,
-            pasajeros: [],
-            destino: this.formularioViaje.value.destino,
-            fechaSalida: this.formularioViaje.value.fechaSalida,
-            auto: this.formularioViaje.value.auto,
-            precio: this.formularioViaje.value.precio
-        };
-
-        try {
-            // Crear un ID de viaje único
-            const viajeId = `${this.usuarioActual.uid}_${new Date().getTime()}`;
-            console.log('Generated viajeId:', viajeId);  // Agrega este log para verificar
-            const path = `Viajes/${viajeId}`;
-            await this.firebaseSrv.setDocument(path, viaje);
-
-            // Navegar a la página de solicitudes con el `viajeId`
-            const navigationExtras: NavigationExtras = { state: { viajeId: viajeId } };
-            this.utilsSrv.presentToast({
-                message: 'Viaje creado exitosamente',
-                duration: 2500,
-                color: 'primary',
-                position: 'bottom',
-                icon: 'checkmark-circle-outline'
-            });
-
-            // Resetear el formulario y navegar
-            this.formularioViaje.reset();
-            this.router.navigate(['/solicitudes-de-viaje'], navigationExtras);
-
-        } catch (error) {
-            this.utilsSrv.presentToast({
-                message: 'Error al crear el viaje: ' + error.message,
-                duration: 2500,
-                color: 'danger',
-                position: 'bottom',
-                icon: 'alert-circle-outline'
-            });
-            console.error('Error al guardar el documento en Firestore:', error);
-        } finally {
-            loading.dismiss();
-        }
-    } else {
+      const loading = await this.utilsSrv.loading();
+      await loading.present();
+  
+      const viaje: Viaje = {
+        estado: estadoViaje.pendiente,
+        piloto: this.usuarioActual,
+        pasajeros: [],
+        destino: this.formularioViaje.value.destino,
+        fechaSalida: this.formularioViaje.value.fechaSalida,
+        auto: this.formularioViaje.value.auto,
+        precio: this.formularioViaje.value.precio,
+        rutas: [] // Initialize rutas as an empty array
+      };
+  
+      try {
+        const viajeId = `${this.usuarioActual.uid}_${new Date().getTime()}`;
+        const path = `Viajes/${viajeId}`;
+        await this.firebaseSrv.setDocument(path, viaje);
+  
+        const navigationExtras: NavigationExtras = { state: { viajeId: viajeId } };
         this.utilsSrv.presentToast({
-            message: 'Formulario incompleto o usuario no cargado',
-            duration: 2500,
-            color: 'danger',
-            position: 'bottom',
-            icon: 'alert-circle-outline'
+          message: 'Viaje creado exitosamente',
+          duration: 2500,
+          color: 'primary',
+          position: 'bottom',
+          icon: 'checkmark-circle-outline'
         });
+  
+        this.formularioViaje.reset();
+        this.router.navigate(['/solicitudes-de-viaje'], navigationExtras);
+      } catch (error) {
+        this.utilsSrv.presentToast({
+          message: 'Error al crear el viaje: ' + error.message,
+          duration: 2500,
+          color: 'danger',
+          position: 'bottom',
+          icon: 'alert-circle-outline'
+        });
+        console.error('Error al guardar el documento en Firestore:', error);
+      } finally {
+        loading.dismiss();
+      }
+    } else {
+      this.utilsSrv.presentToast({
+        message: 'Formulario incompleto o usuario no cargado',
+        duration: 2500,
+        color: 'danger',
+        position: 'bottom',
+        icon: 'alert-circle-outline'
+      });
     }
-}
-
-}
+  }
+}  

@@ -29,6 +29,7 @@ export interface Viaje {
     fechaSalida: string;        
     auto: Auto;            
     precio: number;             
+    rutas?: { lat: number; lng: number }[]; 
 }
 
 export interface Auto {

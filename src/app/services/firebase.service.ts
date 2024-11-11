@@ -84,7 +84,10 @@ export class FirebaseService {
     return results;
   }
 
-  
+  updateDocument(path: string, data: any) {
+    const documentRef = doc(this.firestore, path);
+    return setDoc(documentRef, data, { merge: true });
+  }  
 
 }
  
