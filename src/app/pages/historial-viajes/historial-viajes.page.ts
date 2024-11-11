@@ -28,7 +28,6 @@ export class HistorialViajesPage implements OnInit {
     const {pilotResults, passengerResults} = viajes;
     this.viajesPiloto = pilotResults;
     this.viajesPasajero = passengerResults;
-    console.log(this.viajesPiloto);
   }
 
   showTrips(type: string) {

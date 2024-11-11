@@ -16,10 +16,14 @@
         <ion-chip [color]="getColorByEstado(viaje.estado)">
           <ion-label>{{viaje.estado}}</ion-label>
         </ion-chip>
-        <h2>Destino: {{ viaje.destino }}</h2>
-        <p>Fecha y Hora: {{ viaje.fecha }}</p>
-        <p>Pasajeros: {{ viaje.pasajeros.nombre }}</p>
-        <p>Auto: {{ viaje.auto.marca }}, {{ viaje.auto.modelo }}</p>
+        <h3>Destino: {{ viaje.destino }}</h3>
+        <p>Fecha y Hora: {{ viaje.fechaSalida | date: 'fullDate' }}</p>
+        <p>Pasajeros:
+          <span *ngFor="let pasajero of viaje.pasajeros; let i = index">
+            {{ pasajero.nombre }}<span *ngIf="i < viaje.pasajeros.length - 1">, </span>
+          </span>
+        </p>
+        <p>Auto: {{ viaje.auto.marca }} {{ viaje.auto.modelo }}</p>
       </ion-label>
     </ion-item>
   </ion-list>
@@ -30,10 +34,10 @@
         <ion-chip [color]="getColorByEstado(viaje.estado)">
           <ion-label>{{viaje.estado}}</ion-label>
         </ion-chip>
-        <h2>Piloto: {{ viaje.piloto }}</h2>
-        <p>Fecha y Hora: {{ viaje.fecha }}</p>
+        <h3>Piloto: {{ viaje.piloto }}</h3>
+        <p>Fecha y Hora: {{ viaje.fechaSalida | date: 'longDate' }}</p>
         <p>Destino: {{ viaje.destino }}</p>
-        <p>Auto: {{ viaje.auto.marca }}, {{ viaje.auto.modelo }}</p>
+        <p>Auto: {{ viaje.auto.marca }} {{ viaje.auto.modelo }}</p>
       </ion-label>
     </ion-item>
   </ion-list>
