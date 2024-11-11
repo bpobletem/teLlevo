@@ -1,6 +1,6 @@
 export enum estadoViaje {
     pendiente = 'pendiente',
-    enCurso = 'enCurso',
+    enCurso = 'en-curso',
     cancelado = 'cancelado',
     finalizado = 'finalizado',
 }
