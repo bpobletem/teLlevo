@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { SolicitudesViaje } from 'src/app/interfaces/interfaces';
 import { MapService } from 'src/app/services/map.service';
@@ -32,7 +32,7 @@ export class SolicitudesDeViajePage implements OnInit {
   }
 
   cargarSolicitudes() {
-    this.firebaseSrv.getCollectionChanges<SolicitudesViaje>('SolicitudesViajes').subscribe((solicitudes) => {
+    this.firebaseSrv.getCollectionChanges<SolicitudesViaje>('SolicitudesViaje').subscribe((solicitudes) => {
       console.log('Todas las solicitudes obtenidas:', solicitudes);
       
       this.solicitudes = solicitudes.filter(solicitud => {
@@ -53,7 +53,7 @@ export class SolicitudesDeViajePage implements OnInit {
         this.mapService.addStop(coords, this.viajeId);
 
         // Update the solicitud status to 'aceptado'
-        await this.firebaseSrv.updateDocument(`SolicitudesViajes/${solicitud.viajeId + solicitud.pasajeroId}`, {
+        await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, {
           estado: 'aceptado'
         });
 
@@ -72,7 +72,7 @@ export class SolicitudesDeViajePage implements OnInit {
   async rechazarSolicitud(solicitud: SolicitudesViaje) {
     try {
       // Update the solicitud status to 'rechazado' in Firebase
-      await this.firebaseSrv.updateDocument(`SolicitudesViajes/${solicitud.viajeId + solicitud.pasajeroId}`, {
+      await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, {
         estado: 'rechazado'
       });
       console.log('Solicitud rechazada');
@@ -83,4 +83,10 @@ export class SolicitudesDeViajePage implements OnInit {
       console.error('Error al rechazar la solicitud:', error);
     }
   }
+
+  iniciarViaje() {
+  // Navigate to "Viaje en Curso" page with the viajeId
+  const navigationExtras: NavigationExtras = { state: { viajeId: this.viajeId } };
+  this.router.navigate(['/viaje-en-curso'], navigationExtras);
+}
 }

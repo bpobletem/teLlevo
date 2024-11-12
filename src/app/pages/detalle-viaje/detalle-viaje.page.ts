@@ -91,7 +91,7 @@ export class DetalleViajePage implements OnInit {
 
   async solicitarUnirseAlViaje(viajeId: string, pasajeroId: string) {
     try {
-      await this.firebaseSrv.setDocument(`SolicitudesViajes/${viajeId + pasajeroId}`, {
+      await this.firebaseSrv.setDocument(`SolicitudesViaje/${viajeId + pasajeroId}`, {
         viajeId: viajeId,
         parada: this.formularioViaje.get('destino')?.value,
         pasajeroId: pasajeroId,
