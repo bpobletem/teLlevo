@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router, NavigationExtras } from '@angular/router';
 import { Auto, Usuario, Viaje, estadoViaje } from 'src/app/interfaces/interfaces';
 import { StorageService } from 'src/app/services/storage.service';
@@ -48,11 +48,31 @@ export class CrearViajePage implements OnInit {
     await this.mapService.buildMap('mapContainer');
   }
 
+  private dateRangeValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const selectedDate = new Date(control.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const oneWeekFromNow = new Date();
+      oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+      oneWeekFromNow.setHours(23, 59, 59, 999);
+
+      if (selectedDate < today) {
+        return { pastDate: true };
+      }
+      if (selectedDate > oneWeekFromNow) {
+        return { futureDate: true };
+      }
+      return null;
+    };
+  }
+
   inicializarFormulario() {
     this.formularioViaje = this.formBuilder.group({
       destino: ['', Validators.required],
-      fechaSalida: ['', Validators.required],
-      precio: [0, Validators.required],
+      fechaSalida: ['', [Validators.required, this.dateRangeValidator()]],
+      precio: [0, [Validators.required, Validators.min(1000)]],
       auto: [null, Validators.required]
     });
   }
