@@ -10,7 +10,9 @@
         </ion-card-header>
         <ion-card-content>
           <p>Piloto: {{ viaje.piloto.nombre }}</p>
+          <p>Auto: {{ viaje.auto.marca }} {{ viaje.auto.modelo }} </p>
           <p>Precio: ${{ viaje.precio }}</p>
+          <p>Fecha: {{ viaje.fechaSalida | date: 'dd/MM/yyyy' }}</p>
         </ion-card-content>
       </ion-card>
     </ion-item>
