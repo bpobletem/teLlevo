@@ -31,21 +31,40 @@ export class CrearViajePage implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    await this.inicializarFormulario();
-    await this.cargarUsuarioActual();
-    this.uid = await this.localStorageSrv.get('sesion');
-    
-    // Cargar autos del usuario
-    this.firebaseSrv.getCollectionChanges<Auto>('Auto').subscribe((autos) => {
-      this.autos = autos.filter((auto) => auto.propietario === `Usuario/${this.uid}`);
-    });
-
-    // Obtener la dirección seleccionada en el mapa y asignarla al formulario
-    this.mapService.cbAddress.subscribe((destino: string) => {
-      this.formularioViaje.get('destino')?.setValue(destino);
-    });
-
-    await this.mapService.buildMap('mapContainer');
+    const loading = await this.utilsSrv.loading();
+    await loading.present();
+  
+    try {
+      // Step 1: Initialize form
+      await this.inicializarFormulario();
+      // Step 2: Get user session
+      this.uid = await this.localStorageSrv.get('sesion');
+      if (!this.uid) {
+        throw new Error('No user session found');
+      }
+      // Step 3: Load current user
+      await this.cargarUsuarioActual();
+      // Step 4: Load user's cars
+      await new Promise<void>((resolve, reject) => {
+        this.firebaseSrv.getCollectionChanges<Auto>('Auto').subscribe({
+          next: (autos) => {
+            this.autos = autos.filter((auto) => auto.propietario === `Usuario/${this.uid}`);
+            resolve();
+          },
+          error: (error) => reject(error)
+        });
+      });
+      // Step 5: Setup map destination listener
+      this.mapService.cbAddress.subscribe((destino: string) => {
+        this.formularioViaje.get('destino')?.setValue(destino);
+      });
+      // Step 6: Build map
+      await this.mapService.buildMap('mapContainer');
+    } catch (error) {
+      console.error('Error initializing page:', error);
+    } finally {
+      loading.dismiss();
+    }
   }
 
   private dateRangeValidator(): ValidatorFn {
