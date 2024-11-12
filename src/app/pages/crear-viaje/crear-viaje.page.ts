@@ -72,7 +72,7 @@ export class CrearViajePage implements OnInit {
     this.formularioViaje = this.formBuilder.group({
       destino: ['', Validators.required],
       fechaSalida: ['', [Validators.required, this.dateRangeValidator()]],
-      precio: [0, [Validators.required, Validators.min(1000)]],
+      precio: [0, [Validators.required, Validators.min(500)]],
       auto: [null, Validators.required]
     });
   }
