@@ -58,35 +58,23 @@ export class SolicitudesDeViajePage implements OnInit {
 
   async aceptarSolicitud(solicitud: SolicitudesViaje) {
     try {
-      // Convert the 'parada' address to coordinates
       const coords = await this.mapService.getCoordsFromAddress(solicitud.parada);
       if (coords) {
-        // Add the stop to the route in MapService (locally)
-        this.mapService.addStop(coords, this.viajeId);
+        // Add stop to the route
+        await this.mapService.addStop(coords, this.viajeId);
   
-        // Update the solicitud status to 'aceptado'
-        await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, {
-          estado: 'aceptado'
-        });
-  
-        // Add the passenger to viaje's 'pasajeros' array
-        await this.firebaseSrv.addPassengerToArray(this.viajeId, solicitud.pasajeroId);
-  
-        // Add the coordinates to the viaje's 'rutas' array in Firebase
+        // Update Firebase
+        await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, { estado: 'aceptado' });
         await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
-          rutas: arrayUnion({ lng: coords[0], lat: coords[1] })
+          rutas: arrayUnion({ lng: coords[0], lat: coords[1] }),
         });
   
-        console.log('Solicitud aceptada y parada añadida a las rutas:', coords);
-      } else {
-        console.error('Error al obtener coordenadas para la parada');
+        console.log('Solicitud aceptada and rutas updated:', coords);
       }
     } catch (error) {
-      console.error('Error al aceptar la solicitud:', error);
+      console.error('Error accepting request:', error);
     }
-  }
-  
-  
+  }  
 
   async rechazarSolicitud(solicitud: SolicitudesViaje) {
     try {
@@ -98,7 +86,10 @@ export class SolicitudesDeViajePage implements OnInit {
   }
 
   iniciarViaje() {
-    const navigationExtras: NavigationExtras = { state: { viajeId: this.viajeId } };
-    this.router.navigate(['/viaje-en-curso'], navigationExtras);
+    setTimeout(() => {
+      const navigationExtras: NavigationExtras = { state: { viajeId: this.viajeId } };
+      this.router.navigate(['/viaje-en-curso'], navigationExtras);
+    }, 2000); // Delay to allow Firebase to sync
   }
+  
 }

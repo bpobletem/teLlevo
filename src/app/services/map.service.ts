@@ -24,52 +24,63 @@ export class MapService {
 
   async buildMap(containerId: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      try {
-        // Clear existing map if any
-        const container = document.getElementById(containerId);
-        if (container) {
-          while (container.firstChild) {
-            container.removeChild(container.firstChild);
-          }
+        try {
+            // Clear existing map if any
+            const container = document.getElementById(containerId);
+            if (container) {
+                while (container.firstChild) {
+                    container.removeChild(container.firstChild);
+                }
+            }
+
+            // Initialize the map
+            this.map = new mapboxgl.Map({
+                container: containerId,
+                style: this.style,
+                zoom: this.zoom,
+                center: [this.lng, this.lat],
+            });
+
+            // Wait for the style to load before proceeding
+            this.map.on('load', () => {
+                console.log('Map style fully loaded.');
+
+                // Add initial marker at DUOC
+                const startCoords: [number, number] = [this.lng, this.lat];
+                this.addMarker(startCoords, 'driver');
+                this.stops.push(startCoords);
+
+                // Add geocoder for finding destinations
+                const geocoder = new MapboxGeocoder({
+                    accessToken: this.mapbox.accessToken,
+                    mapboxgl: mapboxgl,
+                    placeholder: 'Buscar destino',
+                    countries: 'CL',
+                    proximity: { longitude: this.lng, latitude: this.lat },
+                });
+                this.map.addControl(geocoder);
+
+                // Handle geocoder result (destination selection)
+                geocoder.on('result', (event) => {
+                    const destinationCoords = event.result.center;
+                    this.addStop(destinationCoords);
+                    this.updateRoute();
+                    this.cbAddress.emit(event.result.place_name); // Emit the selected address
+                });
+
+                resolve({ map: this.map, geocoder });
+            });
+
+            this.map.on('error', (error) => {
+                console.error('Map error:', error);
+                reject(error);
+            });
+        } catch (error) {
+            reject(error);
         }
-
-        // Initialize the map
-        this.map = new mapboxgl.Map({
-          container: containerId,
-          style: this.style,
-          zoom: this.zoom,
-          center: [this.lng, this.lat],
-        });
-
-        // Add initial marker at DUOC
-        const startCoords: [number, number] = [this.lng, this.lat];
-        this.addMarker(startCoords, 'driver');
-        this.stops.push(startCoords);
-
-        // Add geocoder for finding destinations
-        const geocoder = new MapboxGeocoder({
-          accessToken: this.mapbox.accessToken,
-          mapboxgl: mapboxgl,
-          placeholder: 'Buscar destino',
-          countries: 'CL',
-          proximity: { longitude: this.lng, latitude: this.lat },
-        });
-        this.map.addControl(geocoder);
-
-        // Handle geocoder result (destination selection)
-        geocoder.on('result', (event) => {
-          const destinationCoords = event.result.center;
-          this.addStop(destinationCoords);
-          this.updateRoute();
-          this.cbAddress.emit(event.result.place_name); // Emit the selected address
-        });
-
-        resolve({ map: this.map, geocoder });
-      } catch (error) {
-        reject(error);
-      }
     });
-  }
+}
+
 
   addMarker(coords: [number, number], type: 'driver' | 'destination'): void {
     new mapboxgl.Marker().setLngLat(coords).addTo(this.map);
@@ -85,7 +96,7 @@ export class MapService {
 }
 
 updateRoute(): void {
-  if (this.stops.length < 2) {
+  if (!this.stops || this.stops.length < 2) {
       console.warn("No hay suficientes puntos para dibujar una ruta.");
       return;
   }

@@ -12,15 +12,14 @@ import { StorageService } from 'src/app/services/storage.service';
 export class ViajeEnCursoPage implements OnInit, AfterViewInit {
   viaje: any = {}; // Datos actuales del viaje
   esPiloto: boolean = false;
+  mapInitialized: boolean = false;
 
   constructor(
     private router: Router,
     private firebaseSrv: FirebaseService,
     private mapService: MapService,
     private storageSrv: StorageService
-  ) {
-    console.log('Constructor: Component instance created');
-  }
+  ) {}
 
   async ngOnInit() {
     console.log('ngOnInit: Component initialized');
@@ -43,30 +42,15 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
 
     this.esPiloto = currentUserUid === this.viaje?.piloto?.uid;
     console.log('ngOnInit: Is current user the pilot?', this.esPiloto);
+
+    // Initialize map only after trip data is loaded
+    if (this.viaje.rutas && this.viaje.rutas.length > 0) {
+      await this.initializeMapWithRoutes();
+    }
   }
 
   async ngAfterViewInit() {
     console.log('ngAfterViewInit: View initialized');
-
-    try {
-      // Initialize the map
-      await this.mapService.buildMap('mapContainer');
-      console.log('ngAfterViewInit: Map initialized');
-
-      // Check if route data is available
-      if (this.viaje?.rutas && this.viaje.rutas.length > 0) {
-        console.log('ngAfterViewInit: Routes loaded:', this.viaje.rutas);
-
-        // Assign stops and update the route
-        this.mapService.stops = this.viaje.rutas.map((parada: any) => [parada.lng, parada.lat]);
-        this.mapService.updateRoute();
-        console.log('ngAfterViewInit: Route updated on the map');
-      } else {
-        console.warn('ngAfterViewInit: No routes found for the trip');
-      }
-    } catch (error) {
-      console.error('ngAfterViewInit: Error initializing the map or updating the route', error);
-    }
   }
 
   async loadViajeById(viajeId: string) {
@@ -77,6 +61,11 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
       if (viaje) {
         this.viaje = viaje;
         console.log('loadViajeById: Trip details loaded:', this.viaje);
+
+        // Initialize map if not already initialized
+        if (this.viaje.rutas && this.viaje.rutas.length > 0 && !this.mapInitialized) {
+          await this.initializeMapWithRoutes();
+        }
       } else {
         console.error('loadViajeById: No trip found for the given ID');
       }
@@ -84,6 +73,28 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
       console.error('loadViajeById: Error fetching trip details:', error);
     }
   }
+
+  async initializeMapWithRoutes() {
+    if (this.mapInitialized) {
+        console.warn("Map is already initialized.");
+        return;
+    }
+
+    try {
+        console.log('initializeMapWithRoutes: Initializing map with routes');
+        await this.mapService.buildMap('mapContainer');
+        this.mapInitialized = true;
+
+        // Update map with routes after initialization
+        this.mapService.stops = this.viaje.rutas.map((parada: any) => [parada.lng, parada.lat]);
+        this.mapService.updateRoute();
+        console.log('initializeMapWithRoutes: Route updated on the map');
+    } catch (error) {
+        console.error('initializeMapWithRoutes: Error initializing map with routes', error);
+    }
+}
+
+
 
   finalizarViaje() {
     if (this.viaje.id && this.esPiloto) {
