@@ -1,10 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { FirebaseService } from '../../services/firebase.service';
 import { StorageService } from '../../services/storage.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MapService } from '../../services/map.service';
+import { EstadoSolicitud, SolicitudesViaje } from 'src/app/interfaces/interfaces';
 
 @Component({
   selector: 'app-detalle-viaje',
@@ -58,7 +59,7 @@ export class DetalleViajePage implements OnInit {
     });
   }
 
-  async unirseAlViaje() {
+ async unirseAlViaje() {
     if (!this.formularioViaje.valid) {
       const alert = await this.alertController.create({
         header: 'Error',
@@ -91,17 +92,23 @@ export class DetalleViajePage implements OnInit {
 
   async solicitarUnirseAlViaje(viajeId: string, pasajeroId: string) {
     try {
-      await this.firebaseSrv.setDocument(`SolicitudesViaje/${viajeId + pasajeroId}`, {
+      const solicitud: SolicitudesViaje = {
         viajeId: viajeId,
         parada: this.formularioViaje.get('destino')?.value,
         pasajeroId: pasajeroId,
-        estado: 'pendiente'
-      });
-      console.log('Solicitud de unión enviada:', { viajeId, parada: this.formularioViaje.get('destino')?.value, pasajeroId });
+        estado: EstadoSolicitud.pendiente
+      };
+  
+      await this.firebaseSrv.setDocument(`SolicitudesViaje/${viajeId + pasajeroId}`, solicitud);
+  
+      const navigationExtras: NavigationExtras = {
+        state: { userId: pasajeroId }
+      };
+      this.router.navigate(['/historial-solicitudes'], navigationExtras);
+  
     } catch (error) {
       console.error('Error al enviar la solicitud:', error);
     }
   }
-  
   
 }
