@@ -70,24 +70,38 @@ export class CrearViajePage implements OnInit {
 
   private dateRangeValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const selectedDate = new Date(control.value);
+      const controlValue = control.value;
+  
+      if (!controlValue) {
+        console.log('Control value is empty or invalid.');
+        return null;
+      }
+  
+      const selectedDate = new Date(`${controlValue}T00:00:00`);
+      if (isNaN(selectedDate.getTime())) {
+        console.log('Invalid date format:', controlValue);
+        return { invalidDate: true };
+      }
+  
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-
+  
       const oneWeekFromNow = new Date();
       oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
-      oneWeekFromNow.setHours(23, 59, 59, 999);
-
+      oneWeekFromNow.setHours(0, 0, 0, 0);
+  
       if (selectedDate < today) {
         return { pastDate: true };
       }
       if (selectedDate > oneWeekFromNow) {
         return { futureDate: true };
       }
-      return null;
+
+      return null; 
     };
   }
-
+  
+  
   inicializarFormulario() {
     this.formularioViaje = this.formBuilder.group({
       destino: ['', Validators.required],

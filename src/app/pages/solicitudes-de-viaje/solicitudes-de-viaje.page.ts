@@ -62,23 +62,34 @@ export class SolicitudesDeViajePage implements OnInit {
 
   async aceptarSolicitud(solicitud: SolicitudesViaje) {
     try {
+      // Get coordinates for the stop
       const coords = await this.mapService.getCoordsFromAddress(solicitud.parada);
-      if (coords) {
-        // Add stop to the route
-        await this.mapService.addStop(coords, this.viajeId);
-  
-        // Update Firebase
-        await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, { estado: EstadoSolicitud.aprobado });
-        await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
-          rutas: arrayUnion({ lng: coords[0], lat: coords[1] }),
-        });
-  
-        console.log('Solicitud aceptada and rutas updated:', coords);
+      if (!coords) {
+        throw new Error('Invalid coordinates for the given address');
       }
+  
+      console.log('Adding stop coordinates:', coords);
+  
+      // Add the stop to the map and update Firebase
+      await this.mapService.addStop(coords, this.viajeId);
+  
+      // Update the state of the solicitud to approved
+      await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, {
+        estado: EstadoSolicitud.aprobado,
+      });
+  
+      // Add the stop to the rutas field in Viajes
+      await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
+        rutas: arrayUnion({ lng: coords[0], lat: coords[1] }),
+        pasajeros: arrayUnion(solicitud.pasajeroId), // Add the passenger to the trip
+      });
+  
+      console.log(`Solicitud for pasajero ${solicitud.pasajeroId} accepted and updated.`);
     } catch (error) {
-      console.error('Error accepting request:', error);
+      console.error('Error accepting solicitud:', error);
     }
-  }  
+  }
+  
 
   async rechazarSolicitud(solicitud: SolicitudesViaje) {
     try {

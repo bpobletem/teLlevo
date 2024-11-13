@@ -6,7 +6,6 @@ import { StorageService } from '../../services/storage.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MapService } from '../../services/map.service';
 import { EstadoSolicitud, estadoViaje } from 'src/app/interfaces/interfaces';
-import { EstadoSolicitud, SolicitudesViaje } from 'src/app/interfaces/interfaces';
 
 @Component({
   selector: 'app-detalle-viaje',
@@ -60,7 +59,7 @@ export class DetalleViajePage implements OnInit {
     });
   }
 
- async unirseAlViaje() {
+  async unirseAlViaje() {
     if (!this.formularioViaje.valid) {
       const alert = await this.alertController.create({
         header: 'Error',
@@ -95,7 +94,7 @@ export class DetalleViajePage implements OnInit {
 
   async solicitarUnirseAlViaje(viajeId: string, pasajeroId: string) {
     try {
-      const solicitud: SolicitudesViaje = {
+      await this.firebaseSrv.setDocument(`SolicitudesViaje/${viajeId + pasajeroId}`, {
         viajeId: viajeId,
         parada: this.formularioViaje.get('destino')?.value,
         pasajeroId: pasajeroId,
@@ -106,5 +105,6 @@ export class DetalleViajePage implements OnInit {
       console.error('Error al enviar la solicitud:', error);
     }
   }
+  
   
 }
