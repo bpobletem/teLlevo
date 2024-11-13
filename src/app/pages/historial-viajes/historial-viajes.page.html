@@ -23,7 +23,7 @@
             {{ pasajero.nombre }}<span *ngIf="i < viaje.pasajeros.length - 1">, </span>
           </span>
         </p>
-        <p>Auto: {{ viaje.auto.marca }} {{ viaje.auto.modelo }}</p>
+        <p>Auto: {{ viaje.auto.marca }} {{ viaje.auto.modelo }} {{ viaje.auto.patente }}</p>
       </ion-label>
     </ion-item>
   </ion-list>
@@ -37,7 +37,7 @@
         <h3>Piloto: {{ viaje.piloto.nombre }} {{ viaje.piloto.apellido }}</h3>
         <p>Fecha y Hora: {{ viaje.fechaSalida | date: 'longDate' }}</p>
         <p>Destino: {{ viaje.destino }}</p>
-        <p>Auto: {{ viaje.auto.marca }} {{ viaje.auto.modelo }}</p>
+        <p>Auto: {{ viaje.auto.marca }} {{ viaje.auto.modelo }} {{ viaje.auto.patente }}</p>
       </ion-label>
     </ion-item>
   </ion-list>
