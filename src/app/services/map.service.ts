@@ -68,6 +68,7 @@ export class MapService {
                     this.cbAddress.emit(event.result.place_name); // Emit the selected address
                 });
 
+                // Resolve only after everything is initialized
                 resolve({ map: this.map, geocoder });
             });
 
@@ -80,6 +81,7 @@ export class MapService {
         }
     });
 }
+
 
 
   addMarker(coords: [number, number], type: 'driver' | 'destination'): void {
@@ -116,6 +118,7 @@ updateRoute(): void {
       error => console.error('Error al obtener la ruta:', error)
   );
 }
+
 
 
   updateOptimizedRoute(): void {

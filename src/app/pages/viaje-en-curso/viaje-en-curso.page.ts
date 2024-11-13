@@ -51,7 +51,11 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
 
   async ngAfterViewInit() {
     console.log('ngAfterViewInit: View initialized');
-  }
+    if (this.viaje?.rutas && this.viaje.rutas.length > 0) {
+        // Initialize map with routes after DOM is fully ready
+        await this.initializeMapWithRoutes();
+    }
+}
 
   async loadViajeById(viajeId: string) {
     console.log('loadViajeById: Fetching trip details for ID:', viajeId);
@@ -85,14 +89,18 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
         await this.mapService.buildMap('mapContainer');
         this.mapInitialized = true;
 
-        // Update map with routes after initialization
-        this.mapService.stops = this.viaje.rutas.map((parada: any) => [parada.lng, parada.lat]);
-        this.mapService.updateRoute();
-        console.log('initializeMapWithRoutes: Route updated on the map');
+        // Add a slight delay to ensure Mapbox fully applies styles
+        setTimeout(() => {
+            // Update map with routes after initialization
+            this.mapService.stops = this.viaje.rutas.map((parada: any) => [parada.lng, parada.lat]);
+            this.mapService.updateRoute();
+            console.log('initializeMapWithRoutes: Route updated on the map');
+        }, 500); // 500ms delay to allow rendering
     } catch (error) {
         console.error('initializeMapWithRoutes: Error initializing map with routes', error);
     }
 }
+
 
 
 
