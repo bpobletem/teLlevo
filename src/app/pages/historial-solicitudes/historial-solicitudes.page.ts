@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SolicitudesViaje, Usuario, Viaje } from 'src/app/interfaces/interfaces';
+import { EstadoSolicitud, SolicitudesViaje, Usuario, Viaje } from 'src/app/interfaces/interfaces';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { UtilsService } from 'src/app/services/utils.service';
 
@@ -54,11 +54,11 @@ export class HistorialSolicitudesPage implements OnInit {
 
   getColorByEstado(estado: string): string {
     switch (estado) {
-      case 'pendiente':
+      case EstadoSolicitud.pendiente:
         return 'warning';
-      case 'aceptado':
+      case EstadoSolicitud.aprobado:
         return 'success';
-      case 'rechazado':
+      case EstadoSolicitud.rechazado:
         return 'danger';
       default:
         return 'medium';

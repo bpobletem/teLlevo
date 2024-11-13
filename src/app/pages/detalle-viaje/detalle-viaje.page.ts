@@ -1,10 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { FirebaseService } from '../../services/firebase.service';
 import { StorageService } from '../../services/storage.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MapService } from '../../services/map.service';
+import { EstadoSolicitud, estadoViaje } from 'src/app/interfaces/interfaces';
 
 @Component({
   selector: 'app-detalle-viaje',
@@ -81,6 +82,8 @@ export class DetalleViajePage implements OnInit {
           text: 'Confirmar',
           handler: () => {
             this.solicitarUnirseAlViaje(this.viajeId, this.pasajeroId);
+            let nav: NavigationExtras = { state: { viajeId: this.viajeId } };
+            this.router.navigate(['/historial-solicitud'], nav);
           },
         },
       ],
@@ -95,7 +98,7 @@ export class DetalleViajePage implements OnInit {
         viajeId: viajeId,
         parada: this.formularioViaje.get('destino')?.value,
         pasajeroId: pasajeroId,
-        estado: 'pendiente'
+        estado: EstadoSolicitud.pendiente
       });
       console.log('Solicitud de unión enviada:', { viajeId, parada: this.formularioViaje.get('destino')?.value, pasajeroId });
     } catch (error) {

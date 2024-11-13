@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
+import { estadoViaje, Viaje } from 'src/app/interfaces/interfaces';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { StorageService } from 'src/app/services/storage.service';
 
@@ -42,25 +43,35 @@ export class HistorialViajesPage implements OnInit {
     }
   }
 
-  getColorByEstado(estado: string): string {
+  getColorByEstado(estado: estadoViaje): string {
     switch (estado) {
-      case 'en-curso':
+      case estadoViaje.enCurso:
         return 'primary';
-      case 'pendiente':
+      case estadoViaje.pendiente:
         return 'tertiary';
-      case 'terminado':
+      case estadoViaje.finalizado:
         return 'success';
-      case 'cancelado':
+      case estadoViaje.cancelado:
         return 'danger';
       default:
         return 'primary';
     }
   }
 
-  goToSolicitudes(viajeId: string) {
-    const navigationExtras: NavigationExtras = {
-      state: { viajeId: viajeId }
-    };
-    this.router.navigate(['/solicitudes-de-viaje'], navigationExtras);
+  goToSolicitudes(viaje: Viaje) {
+    if (viaje.estado === 'pendiente') {
+      const xtra: NavigationExtras = {
+        state: { viajeId: viaje.id }
+      };
+      this.router.navigate(['/solicitudes-de-viaje'], xtra);
+    } else if (viaje.estado === estadoViaje.enCurso) {
+      const navxtra: NavigationExtras = {
+        state: { viajeId: viaje.id }
+      };
+      this.router.navigate(['/viaje-en-curso'], navxtra);
+    } else {
+      return
+    }
+    
   }
 }
