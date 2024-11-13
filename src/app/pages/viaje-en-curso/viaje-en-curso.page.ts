@@ -42,20 +42,15 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
 
     this.esPiloto = currentUserUid === this.viaje?.piloto?.uid;
     console.log('ngOnInit: Is current user the pilot?', this.esPiloto);
-
-    // Initialize map only after trip data is loaded
-    if (this.viaje.rutas && this.viaje.rutas.length > 0) {
-      await this.initializeMapWithRoutes();
-    }
   }
 
   async ngAfterViewInit() {
     console.log('ngAfterViewInit: View initialized');
     if (this.viaje?.rutas && this.viaje.rutas.length > 0) {
-        // Initialize map with routes after DOM is fully ready
-        await this.initializeMapWithRoutes();
+      // Initialize map with routes after DOM is fully ready
+      await this.initializeMapWithRoutes();
     }
-}
+  }
 
   async loadViajeById(viajeId: string) {
     console.log('loadViajeById: Fetching trip details for ID:', viajeId);
@@ -80,29 +75,23 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
 
   async initializeMapWithRoutes() {
     if (this.mapInitialized) {
-        console.warn("Map is already initialized.");
-        return;
+      console.warn("Map is already initialized.");
+      return;
     }
 
     try {
-        console.log('initializeMapWithRoutes: Initializing map with routes');
-        await this.mapService.buildMap('mapContainer');
-        this.mapInitialized = true;
+      console.log('initializeMapWithRoutes: Initializing map with routes');
+      await this.mapService.buildMap('mapContainer'); // Wait for the map to be built
+      this.mapInitialized = true;
 
-        // Add a slight delay to ensure Mapbox fully applies styles
-        setTimeout(() => {
-            // Update map with routes after initialization
-            this.mapService.stops = this.viaje.rutas.map((parada: any) => [parada.lng, parada.lat]);
-            this.mapService.updateRoute();
-            console.log('initializeMapWithRoutes: Route updated on the map');
-        }, 500); // 500ms delay to allow rendering
+      // Ensure map updates happen after it is fully initialized
+      this.mapService.stops = this.viaje.rutas.map((parada: any) => [parada.lng, parada.lat]);
+      this.mapService.updateRoute();
+      console.log('initializeMapWithRoutes: Route updated on the map');
     } catch (error) {
-        console.error('initializeMapWithRoutes: Error initializing map with routes', error);
+      console.error('initializeMapWithRoutes: Error initializing map with routes', error);
     }
-}
-
-
-
+  }
 
   finalizarViaje() {
     if (this.viaje.id && this.esPiloto) {

@@ -68,7 +68,7 @@ export class MapService {
                     this.cbAddress.emit(event.result.place_name); // Emit the selected address
                 });
 
-                // Resolve only after everything is initialized
+                // Resolve after map and geocoder are fully set up
                 resolve({ map: this.map, geocoder });
             });
 
@@ -81,6 +81,8 @@ export class MapService {
         }
     });
 }
+
+
 
 
 

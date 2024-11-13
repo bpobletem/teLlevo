@@ -85,11 +85,15 @@ export class SolicitudesDeViajePage implements OnInit {
     }
   }
 
-  iniciarViaje() {
+ async iniciarViaje() {
     setTimeout(() => {
       const navigationExtras: NavigationExtras = { state: { viajeId: this.viajeId } };
       this.router.navigate(['/viaje-en-curso'], navigationExtras);
     }, 2000); // Delay to allow Firebase to sync
+
+    await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
+      estado: this.viaje.estadoViaje.enCurso
+    });
   }
   
 }
