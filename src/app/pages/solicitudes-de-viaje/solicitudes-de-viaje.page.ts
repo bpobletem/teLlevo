@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, NavigationExtras } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { SolicitudesViaje } from 'src/app/interfaces/interfaces';
 import { MapService } from 'src/app/services/map.service';
 import { FieldValue, arrayUnion } from 'firebase/firestore';
+import { UtilsService } from 'src/app/services/utils.service';
+import { AlertController } from '@ionic/angular';
 
 
 @Component({
@@ -15,11 +17,13 @@ export class SolicitudesDeViajePage implements OnInit {
   viajeId: string = '';
   solicitudes: SolicitudesViaje[] = [];
   viaje: any;
+  utilsSrv = inject(UtilsService);
 
   constructor(
     private router: Router,
     private firebaseSrv: FirebaseService,
-    private mapService: MapService
+    private mapService: MapService,
+    private alertController: AlertController,
   ) {}
 
   ngOnInit() {
@@ -90,6 +94,53 @@ export class SolicitudesDeViajePage implements OnInit {
       const navigationExtras: NavigationExtras = { state: { viajeId: this.viajeId } };
       this.router.navigate(['/viaje-en-curso'], navigationExtras);
     }, 2000); // Delay to allow Firebase to sync
+  }
+  
+  async cancelarViaje() {
+    const alert = await this.alertController.create({
+      header: 'Confirmar cancelación',
+      message: '¿Estás seguro que deseas cancelar este viaje?',
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel'
+        },
+        {
+          text: 'Sí, cancelar',
+          handler: async () => {
+            const loading = await this.utilsSrv.loading();
+            await loading.present();
+  
+            try {
+              await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
+                estado: 'cancelado'
+              });
+  
+              this.utilsSrv.presentToast({
+                message: 'Viaje cancelado exitosamente',
+                duration: 2000,
+                color: 'primary',
+                position: 'bottom'
+              });
+  
+              this.router.navigate(['/historial-viajes']);
+            } catch (error) {
+              console.error('Error al cancelar el viaje:', error);
+              this.utilsSrv.presentToast({
+                message: 'Error al cancelar el viaje',
+                duration: 2000,
+                color: 'danger',
+                position: 'bottom'
+              });
+            } finally {
+              loading.dismiss();
+            }
+          }
+        }
+      ]
+    });
+  
+    await alert.present();
   }
   
 }
