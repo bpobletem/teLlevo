@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { StorageService } from 'src/app/services/storage.service';
 
@@ -53,5 +53,12 @@ export class HistorialViajesPage implements OnInit {
       default:
         return 'primary';
     }
+  }
+
+  goToSolicitudes(viajeId: string) {
+    const navigationExtras: NavigationExtras = {
+      state: { viajeId: viajeId }
+    };
+    this.router.navigate(['/solicitudes-de-viaje'], navigationExtras);
   }
 }

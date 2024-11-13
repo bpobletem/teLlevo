@@ -11,7 +11,7 @@
   </ion-segment>
 
   <ion-list *ngIf="isPiloto">
-    <ion-item *ngFor="let viaje of viajesPiloto" class="ion-margin-end">
+    <ion-item *ngFor="let viaje of viajesPiloto" class="ion-margin-end" (click)="viaje.estado === 'pendiente' && goToSolicitudes(viaje.id)">
       <ion-label>
         <ion-chip [color]="getColorByEstado(viaje.estado)">
           <ion-label>{{viaje.estado}}</ion-label>
