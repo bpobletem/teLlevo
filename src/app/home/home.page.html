@@ -1,21 +1,24 @@
 <app-encabezado titulo="Inicio"></app-encabezado>
 
 <ion-content class="ion-padding">
-  <div *ngIf="isLoggedIn; else notLoggedIn">
-    <ion-list>
-      <ion-item routerLink="/buscar-viaje" class="ion-margin-end">
-        <ion-label>Buscar viaje</ion-label>
-      </ion-item>
-      <ion-item routerLink="/crear-viaje" class="ion-margin-end">
-        <ion-label>Crear viaje</ion-label>
-      </ion-item>
-    </ion-list>
+  <div class="card-container">
+    <ion-card routerLink="/crear-viaje" class="centered-card">
+        <ion-card-header>
+          <ion-icon name="car-outline" class="icon-large ion-text-center"></ion-icon>
+          <ion-card-title class="ion-text-center">
+            Crear viaje
+          </ion-card-title>
+        </ion-card-header>
+    </ion-card>
   </div>
-
-  <ng-template #notLoggedIn>
-    <h5 color="primary" class="ion-text-center">
-      Por favor, inicia sesión para acceder a las opciones de viaje.
-    </h5>
-    <ion-button expand="block" routerLink="/iniciar-sesion" class="ion-margin">Iniciar Sesión</ion-button>
-  </ng-template>
+  <div class="card-container">
+    <ion-card routerLink="/buscar-viaje" class="centered-card">
+      <ion-card-header>
+        <ion-icon name="search-outline" class="icon-large ion-text-center"></ion-icon>
+        <ion-card-title class="ion-text-center">
+          Buscar viaje
+        </ion-card-title>
+      </ion-card-header>
+    </ion-card>
+  </div>
 </ion-content>
