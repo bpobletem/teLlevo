@@ -3,6 +3,7 @@ import { Router, NavigationExtras } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { UtilsService } from 'src/app/services/utils.service';
 import { Viaje, estadoViaje } from 'src/app/interfaces/interfaces';
+import { StorageService } from 'src/app/services/storage.service';
 
 @Component({
   selector: 'app-buscar-viaje',
@@ -14,6 +15,7 @@ export class BuscarViajePage implements OnInit {
   viajes: Viaje[] = [];
   firebaseSrv = inject(FirebaseService);
   utilsSrv = inject(UtilsService);
+  storageSrv = inject(StorageService);
 
   constructor(private router: Router) { }
 
@@ -33,13 +35,19 @@ export class BuscarViajePage implements OnInit {
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Set to start of day
+
+      const currentUserId = await this.storageSrv.get('sesion');
+      if (!currentUserId) {
+        throw new Error('No user session found');
+      }
   
       this.firebaseSrv.getCollectionChanges<Viaje>('Viajes').subscribe({
         next: (viajes) => {
           this.viajes = viajes.filter(viaje => {
             const fechaSalida = new Date(viaje.fechaSalida);
             return viaje.estado === estadoViaje.pendiente && 
-                   fechaSalida >= today;
+              fechaSalida >= today &&
+              viaje.piloto.uid !== currentUserId;
           });
           loading.dismiss();
         },
