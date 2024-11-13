@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 import { Usuario } from 'src/app/interfaces/interfaces';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { UtilsService } from 'src/app/services/utils.service';
@@ -32,6 +32,17 @@ export class PerfilPage implements OnInit {
 
   ionViewWillEnter() {
     this.loadUser();
+  }
+
+  goToHistorialSolicitudes() {
+    if (this.currentUser) {
+      const navigationExtras: NavigationExtras = {
+        state: { userId: this.currentUser.uid }
+      };
+      this.router.navigate(['/historial-solicitudes'], navigationExtras);
+    } else {
+      console.error('No current user found');
+    }
   }
 
   loadUser() {
