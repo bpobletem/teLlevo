@@ -3,6 +3,8 @@ import { Router, NavigationExtras } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { SolicitudesViaje } from 'src/app/interfaces/interfaces';
 import { MapService } from 'src/app/services/map.service';
+import { FieldValue, arrayUnion } from 'firebase/firestore';
+
 
 @Component({
   selector: 'app-solicitudes-viaje',
@@ -59,7 +61,7 @@ export class SolicitudesDeViajePage implements OnInit {
       // Convert the 'parada' address to coordinates
       const coords = await this.mapService.getCoordsFromAddress(solicitud.parada);
       if (coords) {
-        // Add the stop to the route in MapService
+        // Add the stop to the route in MapService (locally)
         this.mapService.addStop(coords, this.viajeId);
   
         // Update the solicitud status to 'aceptado'
@@ -70,7 +72,12 @@ export class SolicitudesDeViajePage implements OnInit {
         // Add the passenger to viaje's 'pasajeros' array
         await this.firebaseSrv.addPassengerToArray(this.viajeId, solicitud.pasajeroId);
   
-        console.log('Solicitud aceptada y parada añadida:', coords);
+        // Add the coordinates to the viaje's 'rutas' array in Firebase
+        await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
+          rutas: arrayUnion({ lng: coords[0], lat: coords[1] })
+        });
+  
+        console.log('Solicitud aceptada y parada añadida a las rutas:', coords);
       } else {
         console.error('Error al obtener coordenadas para la parada');
       }

@@ -18,42 +18,71 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
     private firebaseSrv: FirebaseService,
     private mapService: MapService,
     private storageSrv: StorageService
-  ) {}
+  ) {
+    console.log('Constructor: Component instance created');
+  }
 
   async ngOnInit() {
+    console.log('ngOnInit: Component initialized');
+
+    // Check navigation state for viajeId
     const nav = this.router.getCurrentNavigation();
-    console.log(nav)
-    this.viaje = nav?.extras?.state?.['viajeId'] || {}; // Carga los datos del viaje
+    const viajeId = nav?.extras?.state?.['viajeId'];
+    console.log('ngOnInit: Navigation state:', nav?.extras?.state);
+
+    if (viajeId) {
+      console.log('ngOnInit: Loading trip with ID:', viajeId);
+      await this.loadViajeById(viajeId);
+    } else {
+      console.error('ngOnInit: No viajeId found in navigation state');
+    }
+
+    // Check if the current user is the pilot
     const currentUserUid = await this.storageSrv.get('sesion');
+    console.log('ngOnInit: Current user UID:', currentUserUid);
+
     this.esPiloto = currentUserUid === this.viaje?.piloto?.uid;
-
-    console.log(this.viaje);
-
-    if (this.viaje.id) {
-      this.loadViajeById(this.viaje)
-    }
-  } 
-  async loadViajeById(viajeId: string) {
-    try {
-      const viaje = await this.firebaseSrv.getDocumentById('Viajes', viajeId);
-      console.log('Viaje data:', viaje);
-      // Handle the viaje data as needed
-
-	    this.mapService.stops = this.viaje.rutas.map((parada: any) => [parada.lng, parada.lat]);
-      this.mapService.updateOptimizedRoute(); // Actualiza la ruta con todas las paradas	
-    } catch (error) {
-      console.error('Error fetching Viaje:', error);
-    }
+    console.log('ngOnInit: Is current user the pilot?', this.esPiloto);
   }
 
   async ngAfterViewInit() {
-    // Espera que el contenedor esté listo antes de inicializar el mapa
-    await this.mapService.buildMap('mapContainer').then(() => {
-      if (this.viaje.rutas) {
+    console.log('ngAfterViewInit: View initialized');
+
+    try {
+      // Initialize the map
+      await this.mapService.buildMap('mapContainer');
+      console.log('ngAfterViewInit: Map initialized');
+
+      // Check if route data is available
+      if (this.viaje?.rutas && this.viaje.rutas.length > 0) {
+        console.log('ngAfterViewInit: Routes loaded:', this.viaje.rutas);
+
+        // Assign stops and update the route
         this.mapService.stops = this.viaje.rutas.map((parada: any) => [parada.lng, parada.lat]);
-        this.mapService.updateOptimizedRoute(); // Dibuja la ruta optimizada en el mapa
+        this.mapService.updateRoute();
+        console.log('ngAfterViewInit: Route updated on the map');
+      } else {
+        console.warn('ngAfterViewInit: No routes found for the trip');
       }
-    }).catch(error => console.error('Error al mostrar el mapa:', error));
+    } catch (error) {
+      console.error('ngAfterViewInit: Error initializing the map or updating the route', error);
+    }
+  }
+
+  async loadViajeById(viajeId: string) {
+    console.log('loadViajeById: Fetching trip details for ID:', viajeId);
+
+    try {
+      const viaje = await this.firebaseSrv.getDocumentById('Viajes', viajeId);
+      if (viaje) {
+        this.viaje = viaje;
+        console.log('loadViajeById: Trip details loaded:', this.viaje);
+      } else {
+        console.error('loadViajeById: No trip found for the given ID');
+      }
+    } catch (error) {
+      console.error('loadViajeById: Error fetching trip details:', error);
+    }
   }
 
   finalizarViaje() {

@@ -74,39 +74,38 @@ export class MapService {
   addMarker(coords: [number, number], type: 'driver' | 'destination'): void {
     new mapboxgl.Marker().setLngLat(coords).addTo(this.map);
   }
-
+  
   addStop(coords: [number, number], viajeId?: string): void {
     this.stops.push(coords);
 
     if (viajeId) {
-      this.updateFirebaseRoutes(viajeId);
+        this.updateFirebaseRoutes(viajeId); // Guarda las coordenadas en Firebase
     }
+    this.updateRoute(); // Muestra la ruta con los puntos actuales sin optimización
+}
 
-    if (this.stops.length > 1) {
-      this.updateOptimizedRoute();
-    } else {
-      this.updateRoute();
-    }
-  }
-
-  updateRoute(): void {
-    if (this.stops.length < 2) {
-      console.warn("Cannot calculate route with less than two stops.");
+updateRoute(): void {
+  if (this.stops.length < 2) {
+      console.warn("No hay suficientes puntos para dibujar una ruta.");
       return;
-    }
-
-    const coordinatesString = this.stops.map((point) => point.join(',')).join(';');
-    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinatesString}?steps=true&geometries=geojson&access_token=${this.mapbox.accessToken}`;
-
-    this.httpClient.get(url).subscribe((res: any) => {
-      if (res?.routes?.[0]?.geometry?.coordinates) {
-        const route = res.routes[0].geometry.coordinates;
-        this.drawRouteOnMap(route, 'route');
-      } else {
-        console.error('No valid routes found:', res);
-      }
-    }, (error) => console.error('Error fetching non-optimized route:', error));
   }
+
+  const coordinates = this.stops.map(point => point.join(',')).join(';');
+  const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?steps=true&geometries=geojson&access_token=${this.mapbox.accessToken}`;
+
+  this.httpClient.get(url).subscribe(
+      (res: any) => {
+          if (res?.routes?.[0]?.geometry?.coordinates) {
+              const route = res.routes[0].geometry.coordinates;
+              this.drawRouteOnMap(route, 'route');
+          } else {
+              console.error('No se encontró una ruta válida:', res);
+          }
+      },
+      error => console.error('Error al obtener la ruta:', error)
+  );
+}
+
 
   updateOptimizedRoute(): void {
     if (this.stops.length < 2) {

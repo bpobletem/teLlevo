@@ -17,20 +17,6 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- Passenger List Section -->
-  <ion-card *ngIf="viaje.pasajeros?.length">
-    <ion-card-header>
-      <ion-card-title>Pasajeros</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ul>
-        <li *ngFor="let pasajero of viaje.pasajeros">
-          {{ pasajero }}
-        </li>
-      </ul>
-    </ion-card-content>
-  </ion-card>
-
   <!-- Action Buttons -->
   <ion-button expand="block" color="primary" (click)="verHistorial()">
     Ver Historial de Viajes

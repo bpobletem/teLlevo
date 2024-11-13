@@ -111,5 +111,20 @@ export class FirebaseService {
       throw new Error('Document not found');
     }
   }
+  async getDocumentsByPilotOrPassengerUid(path: string, uid: string) {
+    const itemCollection = collection(this.firestore, path);
+
+    // Consulta para documentos donde piloto.uid coincide con el uid
+    const pilotQuery = query(itemCollection, where('piloto.uid', '==', uid));
+    const pilotSnapshot = await getDocs(pilotQuery);
+    const pilotResults = pilotSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Consulta para documentos donde el array pasajeros contiene el uid
+    const passengerQuery = query(itemCollection, where('pasajeros', 'array-contains', uid));
+    const passengerSnapshot = await getDocs(passengerQuery);
+    const passengerResults = passengerSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return {pilotResults, passengerResults};
+  }
 }
  

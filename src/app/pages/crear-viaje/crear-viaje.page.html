@@ -14,11 +14,27 @@
     <ion-item class="ion-margin-end">
       <ion-label position="floating">Fecha de Salida</ion-label>
       <ion-input formControlName="fechaSalida" type="date" required></ion-input>
+      <div *ngIf="formularioViaje.get('fechaSalida')?.errors && formularioViaje.get('fechaSalida')?.touched">
+        <ion-text color="danger" *ngIf="formularioViaje.get('fechaSalida')?.errors?.['required']">
+          La fecha es requerida
+        </ion-text>
+        <ion-text color="danger" *ngIf="formularioViaje.get('fechaSalida')?.errors?.['pastDate']">
+          La fecha no puede ser anterior a hoy
+        </ion-text>
+        <ion-text color="danger" *ngIf="formularioViaje.get('fechaSalida')?.errors?.['futureDate']">
+          La fecha no puede ser posterior a una semana
+        </ion-text>
+      </div>
     </ion-item>
 
     <ion-item class="ion-margin-end">
       <ion-label position="floating">Precio</ion-label>
       <ion-input formControlName="precio" type="number" required></ion-input>
+      <div *ngIf="formularioViaje.get('precio')?.errors?.['min'] && formularioViaje.get('precio')?.touched">
+        <ion-text color="danger">
+          El precio mínimo es 300
+        </ion-text>
+      </div>
     </ion-item>
 
     <ion-button expand="block" type="submit" color="primary" class="ion-margin" [disabled]="!formularioViaje?.valid">

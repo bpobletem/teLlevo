@@ -29,13 +29,28 @@ export class BuscarViajePage implements OnInit {
   async ngOnInit() {
     const loading = await this.utilsSrv.loading();
     await loading.present();
+    
     try {
-      this.firebaseSrv.getCollectionChanges<Viaje>('Viajes').subscribe((viaje) => {
-        this.viajes = viaje.filter((viaje) => viaje.estado === estadoViaje.pendiente);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to start of day
+  
+      this.firebaseSrv.getCollectionChanges<Viaje>('Viajes').subscribe({
+        next: (viajes) => {
+          this.viajes = viajes.filter(viaje => {
+            const fechaSalida = new Date(viaje.fechaSalida);
+            return viaje.estado === estadoViaje.pendiente && 
+                   fechaSalida >= today;
+          });
+          loading.dismiss();
+        },
+        error: (error) => {
+          console.error('Error al obtener los viajes:', error);
+          loading.dismiss();
+        }
       });
     } catch (error) {
-      console.error('Error al obtener los autos:', error);
+      console.error('Error en ngOnInit:', error);
+      loading.dismiss();
     }
-    loading.dismiss();
   }
 }

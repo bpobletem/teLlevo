@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router, NavigationExtras } from '@angular/router';
 import { Auto, Usuario, Viaje, estadoViaje } from 'src/app/interfaces/interfaces';
 import { StorageService } from 'src/app/services/storage.service';
@@ -32,28 +32,67 @@ export class CrearViajePage implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    await this.inicializarFormulario();
-    await this.cargarUsuarioActual();
-    this.uid = await this.localStorageSrv.get('sesion');
-    
-    // Cargar autos del usuario
-    this.firebaseSrv.getCollectionChanges<Auto>('Auto').subscribe((autos) => {
-      this.autos = autos.filter((auto) => auto.propietario === `Usuario/${this.uid}`);
-    });
+    const loading = await this.utilsSrv.loading();
+    await loading.present();
+  
+    try {
+      // Step 1: Initialize form
+      await this.inicializarFormulario();
+      // Step 2: Get user session
+      this.uid = await this.localStorageSrv.get('sesion');
+      if (!this.uid) {
+        throw new Error('No user session found');
+      }
+      // Step 3: Load current user
+      await this.cargarUsuarioActual();
+      // Step 4: Load user's cars
+      await new Promise<void>((resolve, reject) => {
+        this.firebaseSrv.getCollectionChanges<Auto>('Auto').subscribe({
+          next: (autos) => {
+            this.autos = autos.filter((auto) => auto.propietario === `Usuario/${this.uid}`);
+            resolve();
+          },
+          error: (error) => reject(error)
+        });
+      });
+      // Step 5: Setup map destination listener
+      this.mapService.cbAddress.subscribe((destino: string) => {
+        this.formularioViaje.get('destino')?.setValue(destino);
+      });
+      // Step 6: Build map
+      await this.mapService.buildMap('mapContainer');
+    } catch (error) {
+      console.error('Error initializing page:', error);
+    } finally {
+      loading.dismiss();
+    }
+  }
 
-    // Obtener la dirección seleccionada en el mapa y asignarla al formulario
-    this.mapService.cbAddress.subscribe((destino: string) => {
-      this.formularioViaje.get('destino')?.setValue(destino);
-    });
+  private dateRangeValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const selectedDate = new Date(control.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-    await this.mapService.buildMap('mapContainer');
+      const oneWeekFromNow = new Date();
+      oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
+      oneWeekFromNow.setHours(23, 59, 59, 999);
+
+      if (selectedDate < today) {
+        return { pastDate: true };
+      }
+      if (selectedDate > oneWeekFromNow) {
+        return { futureDate: true };
+      }
+      return null;
+    };
   }
 
   inicializarFormulario() {
     this.formularioViaje = this.formBuilder.group({
       destino: ['', Validators.required],
-      fechaSalida: ['', Validators.required],
-      precio: [0, Validators.required],
+      fechaSalida: ['', [Validators.required, this.dateRangeValidator()]],
+      precio: [0, [Validators.required, Validators.min(500)]],
       auto: [null, Validators.required],
       uid: ['']
     });
