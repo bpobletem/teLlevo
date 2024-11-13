@@ -22,7 +22,9 @@ export class HistorialViajesPage implements OnInit {
   constructor(private router: Router) { }
 
   async ngOnInit() {
+  }
 
+  async ionViewWillEnter(){
     const userId = await this.localStorageSrv.get('sesion');
     const viajes = await this.firebaseSrv.getDocumentsByPilotOrPassengerUid('Viajes', userId);
     const {pilotResults, passengerResults} = viajes;
