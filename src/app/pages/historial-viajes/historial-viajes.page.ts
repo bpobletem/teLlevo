@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { StorageService } from 'src/app/services/storage.service';
 
@@ -22,7 +22,9 @@ export class HistorialViajesPage implements OnInit {
   constructor(private router: Router) { }
 
   async ngOnInit() {
+  }
 
+  async ionViewWillEnter(){
     const userId = await this.localStorageSrv.get('sesion');
     const viajes = await this.firebaseSrv.getDocumentsByPilotOrPassengerUid('Viajes', userId);
     const {pilotResults, passengerResults} = viajes;
@@ -53,5 +55,12 @@ export class HistorialViajesPage implements OnInit {
       default:
         return 'primary';
     }
+  }
+
+  goToSolicitudes(viajeId: string) {
+    const navigationExtras: NavigationExtras = {
+      state: { viajeId: viajeId }
+    };
+    this.router.navigate(['/solicitudes-de-viaje'], navigationExtras);
   }
 }

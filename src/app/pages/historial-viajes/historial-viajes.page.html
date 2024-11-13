@@ -11,13 +11,13 @@
   </ion-segment>
 
   <ion-list *ngIf="isPiloto">
-    <ion-item *ngFor="let viaje of viajesPiloto" class="ion-margin-end">
+    <ion-item *ngFor="let viaje of viajesPiloto" class="ion-margin-end" (click)="viaje.estado === 'pendiente' && goToSolicitudes(viaje.id)">
       <ion-label>
         <ion-chip [color]="getColorByEstado(viaje.estado)">
           <ion-label>{{viaje.estado}}</ion-label>
         </ion-chip>
         <h3>Destino: {{ viaje.destino }}</h3>
-        <p>Fecha y Hora: {{ viaje.fechaSalida | date: 'fullDate' }}</p>
+        <p>Fecha: {{ viaje.fechaSalida | date: 'fullDate' }}</p>
         <p>Pasajeros:
           <span *ngFor="let pasajero of viaje.pasajeros; let i = index">
             {{ pasajero.nombre }}<span *ngIf="i < viaje.pasajeros.length - 1">, </span>
