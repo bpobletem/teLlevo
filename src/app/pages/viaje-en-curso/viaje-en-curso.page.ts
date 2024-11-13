@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { estadoViaje } from 'src/app/interfaces/interfaces';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { MapService } from 'src/app/services/map.service';
 import { StorageService } from 'src/app/services/storage.service';
@@ -95,7 +96,7 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
 
   finalizarViaje() {
     if (this.viaje.id && this.esPiloto) {
-      this.firebaseSrv.updateDocument(`Viajes/${this.viaje.id}`, { estado: 'finalizado' })
+      this.firebaseSrv.updateDocument(`Viajes/${this.viaje.id}`, { estado: estadoViaje.finalizado })
         .then(() => this.router.navigate(['/home']))
         .catch(error => console.error('Error finalizando el viaje:', error));
     }
@@ -103,7 +104,7 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
 
   cancelarViaje() {
     if (this.viaje.id) {
-      this.firebaseSrv.updateDocument(`Viajes/${this.viaje.id}`, { estado: 'cancelado' })
+      this.firebaseSrv.updateDocument(`Viajes/${this.viaje.id}`, { estado: estadoViaje.cancelado })
         .then(() => this.router.navigate(['/home']))
         .catch(error => console.error('Error cancelando el viaje:', error));
     }

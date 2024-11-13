@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, NavigationExtras } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
-import { SolicitudesViaje } from 'src/app/interfaces/interfaces';
+import { EstadoSolicitud, SolicitudesViaje } from 'src/app/interfaces/interfaces';
 import { MapService } from 'src/app/services/map.service';
 import { FieldValue, arrayUnion } from 'firebase/firestore';
 import { UtilsService } from 'src/app/services/utils.service';
@@ -68,7 +68,7 @@ export class SolicitudesDeViajePage implements OnInit {
         await this.mapService.addStop(coords, this.viajeId);
   
         // Update Firebase
-        await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, { estado: 'aceptado' });
+        await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, { estado: EstadoSolicitud.aprobado });
         await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
           rutas: arrayUnion({ lng: coords[0], lat: coords[1] }),
         });
