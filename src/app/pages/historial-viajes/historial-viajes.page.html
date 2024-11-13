@@ -34,7 +34,7 @@
         <ion-chip [color]="getColorByEstado(viaje.estado)">
           <ion-label>{{viaje.estado}}</ion-label>
         </ion-chip>
-        <h3>Piloto: {{ viaje.piloto }}</h3>
+        <h3>Piloto: {{ viaje.piloto.nombre }} {{ viaje.piloto.apellido }}</h3>
         <p>Fecha y Hora: {{ viaje.fechaSalida | date: 'longDate' }}</p>
         <p>Destino: {{ viaje.destino }}</p>
         <p>Auto: {{ viaje.auto.marca }} {{ viaje.auto.modelo }}</p>
