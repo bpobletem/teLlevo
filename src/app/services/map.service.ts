@@ -9,7 +9,7 @@ import { FirebaseService } from 'src/app/services/firebase.service';
   providedIn: 'root',
 })
 export class MapService {
-  cbAddress: EventEmitter<any> = new EventEmitter<any>();
+  cbAddress: EventEmitter<string> = new EventEmitter<string>();
   mapbox = (mapboxgl as any);
   map!: mapboxgl.Map;
   style = 'mapbox://styles/mapbox/streets-v11';
@@ -25,6 +25,15 @@ export class MapService {
   async buildMap(containerId: string): Promise<any> {
     return new Promise((resolve, reject) => {
       try {
+        // Clear existing map if any
+        const container = document.getElementById(containerId);
+        if (container) {
+          while (container.firstChild) {
+            container.removeChild(container.firstChild);
+          }
+        }
+
+        // Initialize the map
         this.map = new mapboxgl.Map({
           container: containerId,
           style: this.style,
@@ -32,10 +41,12 @@ export class MapService {
           center: [this.lng, this.lat],
         });
 
+        // Add initial marker at DUOC
         const startCoords: [number, number] = [this.lng, this.lat];
         this.addMarker(startCoords, 'driver');
         this.stops.push(startCoords);
 
+        // Add geocoder for finding destinations
         const geocoder = new MapboxGeocoder({
           accessToken: this.mapbox.accessToken,
           mapboxgl: mapboxgl,
@@ -43,19 +54,19 @@ export class MapService {
           countries: 'CL',
           proximity: { longitude: this.lng, latitude: this.lat },
         });
-
         this.map.addControl(geocoder);
 
+        // Handle geocoder result (destination selection)
         geocoder.on('result', (event) => {
           const destinationCoords = event.result.center;
           this.addStop(destinationCoords);
           this.updateRoute();
-          this.cbAddress.emit(event.result.place_name);
+          this.cbAddress.emit(event.result.place_name); // Emit the selected address
         });
 
         resolve({ map: this.map, geocoder });
-      } catch (e) {
-        reject(e);
+      } catch (error) {
+        reject(error);
       }
     });
   }
@@ -66,15 +77,21 @@ export class MapService {
 
   addStop(coords: [number, number], viajeId?: string): void {
     this.stops.push(coords);
+
     if (viajeId) {
       this.updateFirebaseRoutes(viajeId);
     }
-    this.updateRoute();
+
+    if (this.stops.length > 1) {
+      this.updateOptimizedRoute();
+    } else {
+      this.updateRoute();
+    }
   }
 
   updateRoute(): void {
     if (this.stops.length < 2) {
-      console.error("Necesitamos al menos un destino para trazar la ruta.");
+      console.warn("Cannot calculate route with less than two stops.");
       return;
     }
 
@@ -82,51 +99,74 @@ export class MapService {
     const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinatesString}?steps=true&geometries=geojson&access_token=${this.mapbox.accessToken}`;
 
     this.httpClient.get(url).subscribe((res: any) => {
-      if (res.routes && res.routes.length > 0) {
+      if (res?.routes?.[0]?.geometry?.coordinates) {
         const route = res.routes[0].geometry.coordinates;
-
-        if (this.map.getSource('route')) {
-          this.map.removeLayer('route');
-          this.map.removeSource('route');
-        }
-
-        this.map.addSource('route', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: route,
-            },
-          },
-        });
-
-        this.map.addLayer({
-          id: 'route',
-          type: 'line',
-          source: 'route',
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round',
-          },
-          paint: {
-            'line-color': '#1db7dd',
-            'line-width': 5,
-          },
-        });
-
-        const bounds = new mapboxgl.LngLatBounds();
-        route.forEach((coord) => bounds.extend(coord));
-        this.map.fitBounds(bounds, {
-          padding: { top: 100, bottom: 100, left: 100, right: 100 },
-          maxZoom: 12,
-          linear: true,
-        });
+        this.drawRouteOnMap(route, 'route');
       } else {
-        console.error('No se encontraron rutas válidas');
+        console.error('No valid routes found:', res);
       }
+    }, (error) => console.error('Error fetching non-optimized route:', error));
+  }
+
+  updateOptimizedRoute(): void {
+    if (this.stops.length < 2) {
+      console.warn("Cannot calculate optimized route with less than two stops.");
+      return;
+    }
+  
+    const coordinatesString = this.stops.map((point) => point.join(',')).join(';');
+    const url = `https://api.mapbox.com/optimized-trips/v1/mapbox/driving/${coordinatesString}?roundtrip=false&source=first&destination=last&access_token=${this.mapbox.accessToken}`;
+  
+    console.log("Fetching optimized route with URL:", url);
+    console.log("Current stops:", this.stops);
+  
+    this.httpClient.get(url).subscribe((res: any) => {
+      if (res?.trips?.[0]?.geometry?.coordinates) {
+        const optimizedRoute = res.trips[0].geometry.coordinates;
+        this.drawRouteOnMap(optimizedRoute, 'optimizedRoute');
+        console.log("Optimized route data found and drawn.");
+      } else {
+        console.log("Optimized route data not found.", res);
+      }
+    }, (error) => console.error("Error fetching optimized route:", error));
+  }
+  
+
+  drawRouteOnMap(route: [number, number][], layerId: string): void {
+    if (this.map.getSource(layerId)) {
+      this.map.removeLayer(layerId);
+      this.map.removeSource(layerId);
+    }
+
+    this.map.addSource(layerId, {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: route,
+        },
+      },
     });
+
+    this.map.addLayer({
+      id: layerId,
+      type: 'line',
+      source: layerId,
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round',
+      },
+      paint: {
+        'line-color': layerId === 'optimizedRoute' ? '#1db7dd' : '#888',
+        'line-width': 5,
+      },
+    });
+
+    const bounds = new mapboxgl.LngLatBounds();
+    route.forEach((coord) => bounds.extend(coord));
+    this.map.fitBounds(bounds, { padding: 100, maxZoom: 12 });
   }
 
   async updateFirebaseRoutes(viajeId: string): Promise<void> {
@@ -135,7 +175,7 @@ export class MapService {
       await this.firebaseSrv.updateDocument(`Viajes/${viajeId}`, { rutas });
       console.log('Rutas actualizadas en Firebase:', rutas);
     } catch (error) {
-      console.error('Error al actualizar las rutas en Firebase:', error);
+      console.error('Error updating routes in Firebase:', error);
     }
   }
 

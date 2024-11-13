@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
+import { Router, NavigationExtras } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { SolicitudesViaje } from 'src/app/interfaces/interfaces';
 import { MapService } from 'src/app/services/map.service';
@@ -12,12 +12,12 @@ import { MapService } from 'src/app/services/map.service';
 export class SolicitudesDeViajePage implements OnInit {
   viajeId: string = '';
   solicitudes: SolicitudesViaje[] = [];
+  viaje: any;
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute,
     private firebaseSrv: FirebaseService,
-    private mapService: MapService // Inject MapService
+    private mapService: MapService
   ) {}
 
   ngOnInit() {
@@ -26,6 +26,7 @@ export class SolicitudesDeViajePage implements OnInit {
       this.viajeId = navigation['viajeId'];
       console.log('Viaje ID recibido en SolicitudesDeViajePage:', this.viajeId);
       this.cargarSolicitudes();
+      this.cargarViajeDetalles();
     } else {
       console.error('No se recibió el viajeId en NavigationExtras');
     }
@@ -33,15 +34,24 @@ export class SolicitudesDeViajePage implements OnInit {
 
   cargarSolicitudes() {
     this.firebaseSrv.getCollectionChanges<SolicitudesViaje>('SolicitudesViaje').subscribe((solicitudes) => {
-      console.log('Todas las solicitudes obtenidas:', solicitudes);
-      
-      this.solicitudes = solicitudes.filter(solicitud => {
-        console.log('Comparando viajeId:', solicitud.viajeId, 'con', this.viajeId);
-        return solicitud.viajeId === this.viajeId && solicitud.estado === 'pendiente';
-      });
-      
-      console.log('Solicitudes filtradas:', this.solicitudes);
+      this.solicitudes = solicitudes.filter(solicitud => 
+        solicitud.viajeId === this.viajeId && solicitud.estado === 'pendiente'
+      );
     });
+  }
+
+  async cargarViajeDetalles() {
+    try {
+      const viajeSnapshot = await this.firebaseSrv.getDocument(`Viajes/${this.viajeId}`);
+      if (viajeSnapshot) {
+        this.viaje = viajeSnapshot;
+        console.log('Detalles del viaje cargados:', this.viaje);
+      } else {
+        console.error('Error: No se encontraron detalles del viaje.');
+      }
+    } catch (error) {
+      console.error('Error al cargar detalles del viaje:', error);
+    }
   }
 
   async aceptarSolicitud(solicitud: SolicitudesViaje) {
@@ -51,15 +61,15 @@ export class SolicitudesDeViajePage implements OnInit {
       if (coords) {
         // Add the stop to the route in MapService
         this.mapService.addStop(coords, this.viajeId);
-
+  
         // Update the solicitud status to 'aceptado'
         await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, {
           estado: 'aceptado'
         });
-
+  
         // Add the passenger to viaje's 'pasajeros' array
         await this.firebaseSrv.addPassengerToArray(this.viajeId, solicitud.pasajeroId);
-
+  
         console.log('Solicitud aceptada y parada añadida:', coords);
       } else {
         console.error('Error al obtener coordenadas para la parada');
@@ -68,16 +78,12 @@ export class SolicitudesDeViajePage implements OnInit {
       console.error('Error al aceptar la solicitud:', error);
     }
   }
+  
+  
 
   async rechazarSolicitud(solicitud: SolicitudesViaje) {
     try {
-      // Update the solicitud status to 'rechazado' in Firebase
-      await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, {
-        estado: 'rechazado'
-      });
-      console.log('Solicitud rechazada');
-
-      // Remove the rejected request from the displayed list
+      await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, { estado: 'rechazado' });
       this.solicitudes = this.solicitudes.filter(s => s !== solicitud);
     } catch (error) {
       console.error('Error al rechazar la solicitud:', error);
@@ -85,8 +91,7 @@ export class SolicitudesDeViajePage implements OnInit {
   }
 
   iniciarViaje() {
-  // Navigate to "Viaje en Curso" page with the viajeId
-  const navigationExtras: NavigationExtras = { state: { viajeId: this.viajeId } };
-  this.router.navigate(['/viaje-en-curso'], navigationExtras);
-}
+    const navigationExtras: NavigationExtras = { state: { viajeId: this.viajeId } };
+    this.router.navigate(['/viaje-en-curso'], navigationExtras);
+  }
 }

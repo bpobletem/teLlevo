@@ -7,6 +7,7 @@ import { FirebaseService } from 'src/app/services/firebase.service';
 import { UtilsService } from 'src/app/services/utils.service';
 import { MapService } from 'src/app/services/map.service';
 
+
 @Component({
   selector: 'app-crear-viaje',
   templateUrl: './crear-viaje.page.html',
@@ -53,7 +54,8 @@ export class CrearViajePage implements OnInit {
       destino: ['', Validators.required],
       fechaSalida: ['', Validators.required],
       precio: [0, Validators.required],
-      auto: [null, Validators.required]
+      auto: [null, Validators.required],
+      uid: ['']
     });
   }
 
@@ -90,24 +92,27 @@ export class CrearViajePage implements OnInit {
         precio: this.formularioViaje.value.precio,
         rutas: [] // Initialize rutas as an empty array
       };
-  
+
       try {
-        const viajeId = `${this.usuarioActual.uid}_${new Date().getTime()}`;
-        const path = `Viajes/${viajeId}`;
-        await this.firebaseSrv.setDocument(path, viaje);
-  
-        const navigationExtras: NavigationExtras = { state: { viajeId: viajeId } };
+        const docRef = await this.firebaseSrv.addDocument('Viajes', viaje);
+        console.log('Document ID:', docRef);
+
+        // Navigate with the new document ID
+        const navigationExtras: NavigationExtras = { state: { viajeId: docRef} };
+        this.router.navigate(['/solicitudes-de-viaje'], navigationExtras);
         this.utilsSrv.presentToast({
-          message: 'Viaje creado exitosamente',
-          duration: 2500,
-          color: 'primary',
-          position: 'bottom',
-          icon: 'checkmark-circle-outline'
+            message: 'Viaje creado exitosamente',
+            duration: 2500,
+            color: 'primary',
+            position: 'bottom',
+            icon: 'checkmark-circle-outline'
         });
-  
+
+        // Reset the form and navigate
         this.formularioViaje.reset();
         this.router.navigate(['/solicitudes-de-viaje'], navigationExtras);
-      } catch (error) {
+
+    } catch (error) {
         this.utilsSrv.presentToast({
           message: 'Error al crear el viaje: ' + error.message,
           duration: 2500,

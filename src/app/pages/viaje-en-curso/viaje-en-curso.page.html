@@ -1,34 +1,46 @@
-<app-encabezado titulo="Viaje en curso"></app-encabezado>
+<app-encabezado titulo="Viaje en Curso"></app-encabezado>
 
 <ion-content class="ion-padding">
-  <img src="assets/ruta.png" alt="Mapa del viaje"/>
-  <ion-card *ngIf="viaje">
+  <!-- Map container where the map will be displayed -->
+  <div id="mapContainer" style="height: 300px;"></div>
+
+  <!-- Trip Information Section -->
+  <ion-card>
     <ion-card-header>
-      <ion-card-title>Viaje a {{ viaje.destination }}</ion-card-title>
+      <ion-card-title>Detalles del Viaje</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <p><strong>Piloto:</strong> {{ viaje.driverName || 'Tú' }}</p>
-      <p><strong>Hora de salida:</strong> {{ viaje.departureTime }}</p>
-      <p><strong>Asientos disponibles:</strong> {{ viaje.availableSeats }}</p>
-      <p><strong>Precio:</strong> ${{ viaje.price }}</p>
-      <p><strong>Auto:</strong> {{ viaje.auto || 'Desconocido' }}</p>
+      <p><strong>Destino:</strong> {{ viaje.destino }}</p>
+      <p><strong>Fecha de Salida:</strong> {{ viaje.fechaSalida }}</p>
+      <p><strong>Precio:</strong> ${{ viaje.precio }}</p>
+      <p><strong>Conductor:</strong> {{ viaje.piloto?.nombre }} {{ viaje.piloto?.apellido }}</p>
     </ion-card-content>
   </ion-card>
 
-  <ng-container *ngIf="esPiloto">
-    <ion-button expand="block" color="primary" (click)="finalizarViaje()" class="ion-margin">
-      Finalizar Viaje
-    </ion-button>
-  </ng-container>
+  <!-- Passenger List Section -->
+  <ion-card *ngIf="viaje.pasajeros?.length">
+    <ion-card-header>
+      <ion-card-title>Pasajeros</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ul>
+        <li *ngFor="let pasajero of viaje.pasajeros">
+          {{ pasajero }}
+        </li>
+      </ul>
+    </ion-card-content>
+  </ion-card>
 
-  <ng-container *ngIf="!esPiloto">
-    <p>El viaje está en curso. Disfruta del trayecto.</p>
-    <ion-button expand="block" color="primary" (click)="cancelarViaje()" class="ion-margin">
-      Cancelar Viaje
-    </ion-button>
-  </ng-container>
-
-  <ion-button expand="block" fill="outline" (click)="verHistorial()" class="ion-margin">
+  <!-- Action Buttons -->
+  <ion-button expand="block" color="primary" (click)="verHistorial()">
     Ver Historial de Viajes
+  </ion-button>
+
+  <ion-button *ngIf="esPiloto" expand="block" color="success" (click)="finalizarViaje()">
+    Finalizar Viaje
+  </ion-button>
+
+  <ion-button expand="block" color="danger" (click)="cancelarViaje()">
+    Cancelar Viaje
   </ion-button>
 </ion-content>

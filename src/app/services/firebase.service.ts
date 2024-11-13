@@ -5,7 +5,7 @@ import { Auth, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPasswo
 import { Usuario } from '../interfaces/interfaces';
 import { StorageService } from './storage.service';
 import { Router } from '@angular/router';
-
+import { addDoc } from 'firebase/firestore';
 @Injectable({
   providedIn: 'root'
 })
@@ -96,5 +96,20 @@ export class FirebaseService {
     });
   }
   
+  async addDocument(collectionPath: string, data: any) {
+    const itemCollection = collection(this.firestore, collectionPath);
+    const docRef = await addDoc(itemCollection, data);
+    return docRef.id; // Return the document ID for reference if needed
+  }
+
+  async getDocumentById(collectionPath: string, docId: string) {
+    const docRef = doc(this.firestore, `${collectionPath}/${docId}`);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    } else {
+      throw new Error('Document not found');
+    }
+  }
 }
  
