@@ -1,0 +1,17 @@
+<app-encabezado titulo="Historial de Solicitudes"></app-encabezado>
+
+<ion-content class="ion-padding">
+  <ion-list>
+    <ion-item *ngFor="let solicitud of solicitudesViaje" class="ion-margin-end">
+      <ion-label>
+        <ion-chip [color]="getColorByEstado(solicitud.estado)">
+          <ion-label>{{ solicitud.estado }}</ion-label>
+        </ion-chip>
+        <h3>Destino: {{ solicitud.viaje?.destino }}</h3>
+        <p>Fecha de Viaje: {{ solicitud.viaje?.fechaSalida | date: 'shortDate' }}</p>
+        <p>Piloto: {{ solicitud.piloto.nombre }} {{ solicitud.piloto.apellido }}</p>
+        <p>Parada: {{ solicitud.parada }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

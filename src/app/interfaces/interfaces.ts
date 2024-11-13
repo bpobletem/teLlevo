@@ -36,12 +36,14 @@ export interface Auto {
     marca: string;
     modelo: string;
     patente: string;
-    propietario: string; 
+    propietario: string;
 }
 
 export interface SolicitudesViaje {
-    viajeId: string;            
-    parada: string;             
-    pasajeroId: string;         
-    estado: EstadoSolicitud;    
+    viajeId: string;
+    parada: string;
+    pasajeroId: string;
+    estado: EstadoSolicitud;
+    viaje?: Viaje;
+    piloto?: Usuario;
 }

@@ -74,7 +74,15 @@ const routes: Routes = [
   {
     path: 'detalle-auto',
     loadChildren: () => import('./pages/detalle-auto/detalle-auto.module').then( m => m.DetalleAutoPageModule)
+  },  {
+    path: 'historial-solicitudes',
+    loadChildren: () => import('./pages/historial-solicitudes/historial-solicitudes.module').then( m => m.HistorialSolicitudesPageModule)
   },
+  {
+    path: 'detalle-solicitud',
+    loadChildren: () => import('./pages/detalle-solicitud/detalle-solicitud.module').then( m => m.DetalleSolicitudPageModule)
+  },
+
 
 
 ];
