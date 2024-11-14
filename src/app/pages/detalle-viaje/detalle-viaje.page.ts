@@ -83,7 +83,7 @@ export class DetalleViajePage implements OnInit {
           handler: () => {
             this.solicitarUnirseAlViaje(this.viajeId, this.pasajeroId);
             let nav: NavigationExtras = { state: { viajeId: this.viajeId } };
-            this.router.navigate(['/historial-solicitud'], nav);
+            this.router.navigate(['/historial-solicitudes'], nav);
           },
         },
       ],
