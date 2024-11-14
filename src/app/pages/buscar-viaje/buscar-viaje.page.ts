@@ -34,7 +34,7 @@ export class BuscarViajePage implements OnInit {
     
     try {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Set to start of day
+      today.setHours(0, 0, 0, 0);
 
       const currentUserId = await this.storageSrv.get('sesion');
       if (!currentUserId) {
@@ -44,10 +44,18 @@ export class BuscarViajePage implements OnInit {
       this.firebaseSrv.getCollectionChanges<Viaje>('Viajes').subscribe({
         next: (viajes) => {
           this.viajes = viajes.filter(viaje => {
-            const fechaSalida = new Date(viaje.fechaSalida);
-            return viaje.estado === estadoViaje.pendiente && 
-              fechaSalida >= today &&
-              viaje.piloto.uid !== currentUserId;
+            const fechaSalida = new Date(`${viaje.fechaSalida}T00:00:00`); 
+  
+            if (isNaN(fechaSalida.getTime())) {
+              console.warn('Invalid fechaSalida for viaje:', viaje.fechaSalida);
+              return false;
+            }
+
+            return (
+              viaje.estado === estadoViaje.pendiente &&
+              fechaSalida.getTime() >= today.getTime() &&
+              viaje.piloto.uid !== currentUserId
+            );
           });
           loading.dismiss();
         },
@@ -62,3 +70,4 @@ export class BuscarViajePage implements OnInit {
     }
   }
 }
+
