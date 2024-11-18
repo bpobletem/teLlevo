@@ -26,7 +26,8 @@ export interface Viaje {
     piloto: Usuario;            
     pasajeros: Usuario[];        
     destino: string;             
-    fechaSalida: string;        
+    fechaSalida: string;
+    asientosDisponibles: number;    
     auto: Auto;            
     precio: number;             
     rutas?: { lat: number; lng: number }[]; 
