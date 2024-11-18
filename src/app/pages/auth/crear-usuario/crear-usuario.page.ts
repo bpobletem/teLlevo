@@ -99,7 +99,7 @@ export class CrearUsuarioPage implements OnInit {
 
       await this.firebaseSrv.setDocument(path, this.registrarForm.value)
         .then(() => {
-          this.localStorageSrv.set(uid, this.registrarForm.value);
+          this.localStorageSrv.set(this.registrarForm.get('correo')?.value, this.registrarForm.value);
           this.registrarForm.reset();
         })
         .catch(error => {
