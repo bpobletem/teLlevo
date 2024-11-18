@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, NavigationExtras } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
-import { EstadoSolicitud, SolicitudesViaje } from 'src/app/interfaces/interfaces';
+import { EstadoSolicitud, estadoViaje, SolicitudesViaje } from 'src/app/interfaces/interfaces';
 import { MapService } from 'src/app/services/map.service';
 import { FieldValue, arrayUnion } from 'firebase/firestore';
 import { UtilsService } from 'src/app/services/utils.service';
@@ -107,7 +107,7 @@ export class SolicitudesDeViajePage implements OnInit {
     }, 2000); // Delay to allow Firebase to sync
 
     await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
-      estado: this.viaje.estadoViaje.enCurso
+      estado: estadoViaje.enCurso
     });
   }
   
@@ -128,7 +128,7 @@ export class SolicitudesDeViajePage implements OnInit {
   
             try {
               await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
-                estado: 'cancelado'
+                estado: estadoViaje.cancelado
               });
   
               this.utilsSrv.presentToast({
