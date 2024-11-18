@@ -108,6 +108,7 @@ export class CrearViajePage implements OnInit {
       fechaSalida: ['', [Validators.required, this.dateRangeValidator()]],
       precio: [0, [Validators.required, Validators.min(500)]],
       auto: [null, Validators.required],
+      asientosDisponibles: [0, [Validators.required, Validators.min(1)]],
       uid: ['']
     });
   }
@@ -142,6 +143,7 @@ export class CrearViajePage implements OnInit {
         destino: this.formularioViaje.value.destino,
         fechaSalida: this.formularioViaje.value.fechaSalida,
         auto: this.formularioViaje.value.auto,
+        asientosDisponibles: this.formularioViaje.value.asientosDisponibles,
         precio: this.formularioViaje.value.precio,
         rutas: [] // Initialize rutas as an empty array
       };

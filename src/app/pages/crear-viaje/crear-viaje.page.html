@@ -28,6 +28,11 @@
     </ion-item>
 
     <ion-item class="ion-margin-end">
+      <ion-label position="floating">Asientos disponibles</ion-label>
+      <ion-input formControlName="asientosDisponibles" type="number" required></ion-input>
+    </ion-item>
+
+    <ion-item class="ion-margin-end">
       <ion-label position="floating">Precio</ion-label>
       <ion-input formControlName="precio" type="number" required></ion-input>
       <div *ngIf="formularioViaje.get('precio')?.errors?.['min'] && formularioViaje.get('precio')?.touched">
