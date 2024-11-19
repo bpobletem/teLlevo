@@ -39,32 +39,22 @@ export class IniciarSesionPage implements OnInit {
     if (this.form.valid) {
       const loading = await this.utilsSrv.loading();
       await loading.present();
-  
-      const storedUser = await this.localStorageSrv.get('user.correo');
-      const storedPassword = await this.localStorageSrv.get('user.password');
-  
-      if (storedUser && storedPassword) {
-        // Offline login
-        if (this.form.value.correo === storedUser && this.form.value.password === storedPassword) {
-          await loading.dismiss();
-          this.router.navigate(['/home']);
-        } else {
-          await loading.dismiss();
-          this.errorMessage = 'Invalid credentials for offline login';
-        }
-      } else {
-        // Online login
-        this.firebaseSrv.signIn(this.form.value as Usuario).then(async res => {
-          await this.localStorageSrv.set('user.correo', this.form.value.correo);
-          await this.localStorageSrv.set('user.password', this.form.value.password);
-          this.getUser(res.user.uid);
-          await loading.dismiss();
-          this.router.navigate(['/home']);
-        }).catch(async error => {
-          await loading.dismiss();
-          this.errorMessage = 'Error logging in: ' + error.message;
-        });
-      }
+
+      this.firebaseSrv.signIn(this.form.value as Usuario).then(res => {
+        this.getUser(res.user.uid);
+        this.router.navigate(['/home']);
+      }).catch(error => {
+        this.utilsSrv.presentToast({
+          message: error.message,
+          duration: 2500,
+          color: 'primary',
+          position: 'bottom',
+          icon: 'alert-circle-outline'
+        })
+        console.log(error)
+      }).finally(() => {
+        loading.dismiss();
+      })
     }
   }
 
