@@ -95,7 +95,6 @@ export class CrearUsuarioPage implements OnInit {
       await loading.present();
 
       let path = `Usuario/${uid}`;
-      delete this.registrarForm.value.password;
 
       await this.firebaseSrv.setDocument(path, this.registrarForm.value)
         .then(() => {
