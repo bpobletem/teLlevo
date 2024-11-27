@@ -26,8 +26,8 @@ export class HistorialViajesPage implements OnInit {
   }
 
   async ionViewWillEnter(){
-    const userId = await this.localStorageSrv.get('sesion');
-    const viajes = await this.firebaseSrv.getDocumentsByPilotOrPassengerUid('Viajes', userId);
+    const user = await this.localStorageSrv.getUserFromSesion()
+    const viajes = await this.firebaseSrv.getDocumentsByPilotOrPassengerUid('Viajes', user.uid);
     const {pilotResults, passengerResults} = viajes;
     this.viajesPiloto = pilotResults;
     this.viajesPasajero = passengerResults;
