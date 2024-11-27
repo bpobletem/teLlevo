@@ -54,7 +54,8 @@ export class BuscarViajePage implements OnInit {
             return (
               viaje.estado === estadoViaje.pendiente &&
               fechaSalida.getTime() >= today.getTime() &&
-              viaje.piloto.uid !== currentUserId
+              viaje.piloto.uid !== currentUserId &&
+              viaje.asientosDisponibles >= 1
             );
           });
           loading.dismiss();
