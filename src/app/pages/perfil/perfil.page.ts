@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
 import { Usuario } from 'src/app/interfaces/interfaces';
 import { FirebaseService } from 'src/app/services/firebase.service';
+import { StorageService } from 'src/app/services/storage.service';
 import { UtilsService } from 'src/app/services/utils.service';
 
 @Component({
@@ -11,6 +12,7 @@ import { UtilsService } from 'src/app/services/utils.service';
 })
 export class PerfilPage implements OnInit {
   firebaseSrv = inject(FirebaseService);
+  storageSrv = inject(StorageService);
   utilsSrv = inject(UtilsService);
 
   currentUser: Usuario;
@@ -45,26 +47,35 @@ export class PerfilPage implements OnInit {
     }
   }
 
-  loadUser() {
-    this.utilsSrv.loading().then(loading => {
-      loading.present();
+  async loadUser() {
+    const loading = await this.utilsSrv.loading();
+    await loading.present();
   
-      const uid = this.firebaseSrv.auth.currentUser.uid;
-      this.firebaseSrv.getDocument(`Usuario/${uid}`)
-        .then(user => {
-          if (user) {
-            this.currentUser = user as Usuario;
-            console.log(this.currentUser);
-          } else {
-            console.error('Usuario no encontrado');
-          }
-        })
-        .catch(error => {
-          console.error('Error al cargar el usuario:', error);
-        })
-        .finally(() => {
-          loading.dismiss();
-        });
-    });
+    const uid = await this.storageSrv.get('sesion');
+    console.log('Retrieved uid from storage:', uid);
+  
+    if (!uid) {
+      console.error('No uid found in storage');
+      this.router.navigate(['/iniciar-sesion']);
+      await loading.dismiss();
+      return;
+    }
+  
+    this.firebaseSrv.getDocument(`Usuario/${uid}`)
+      .then(user => {
+        if (user) {
+          console.log('User document:', user);
+          this.currentUser = user as Usuario;
+          console.log('Current user:', this.currentUser);
+        } else {
+          console.error('Usuario no encontrado');
+        }
+      })
+      .catch(error => {
+        console.error('Error al cargar el usuario:', error);
+      })
+      .finally(() => {
+        loading.dismiss();
+      });
   }
 }
