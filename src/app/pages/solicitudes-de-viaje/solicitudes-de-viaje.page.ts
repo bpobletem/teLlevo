@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, NavigationExtras } from '@angular/router';
 import { FirebaseService } from 'src/app/services/firebase.service';
-import { EstadoSolicitud, estadoViaje, SolicitudesViaje } from 'src/app/interfaces/interfaces';
+import { EstadoSolicitud, estadoViaje, SolicitudesViaje, Viaje } from 'src/app/interfaces/interfaces';
 import { MapService } from 'src/app/services/map.service';
 import { FieldValue, arrayUnion } from 'firebase/firestore';
 import { UtilsService } from 'src/app/services/utils.service';
@@ -16,7 +16,7 @@ import { AlertController } from '@ionic/angular';
 export class SolicitudesDeViajePage implements OnInit {
   viajeId: string = '';
   solicitudes: SolicitudesViaje[] = [];
-  viaje: any;
+  viaje: Viaje;
   utilsSrv = inject(UtilsService);
 
   constructor(
@@ -48,9 +48,9 @@ export class SolicitudesDeViajePage implements OnInit {
 
   async cargarViajeDetalles() {
     try {
-      const viajeSnapshot = await this.firebaseSrv.getDocument(`Viajes/${this.viajeId}`);
-      if (viajeSnapshot) {
-        this.viaje = viajeSnapshot;
+      const viaje = await this.firebaseSrv.getDocument(`Viajes/${this.viajeId}`);
+      if (viaje) {
+        this.viaje = viaje as Viaje;
         console.log('Detalles del viaje cargados:', this.viaje);
       } else {
         console.error('Error: No se encontraron detalles del viaje.');
@@ -77,11 +77,20 @@ export class SolicitudesDeViajePage implements OnInit {
       await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, {
         estado: EstadoSolicitud.aprobado,
       });
+
+      // Retrieve the current value of asientosDisponibles
+      const viajeDoc = await this.firebaseSrv.getDocument(`Viajes/${this.viajeId}`);
+      const currentAsientosDisponibles = viajeDoc['asientosDisponibles'];
+      if (currentAsientosDisponibles <= 0) {
+        throw new Error('No available seats');
+      }
+      const newAsientosDisponibles = currentAsientosDisponibles - 1;
   
       // Add the stop to the rutas field in Viajes
       await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
         rutas: arrayUnion({ lng: coords[0], lat: coords[1] }),
         pasajeros: arrayUnion(solicitud.pasajeroId), // Add the passenger to the trip
+        asientosDisponibles: newAsientosDisponibles
       });
   
       console.log(`Solicitud for pasajero ${solicitud.pasajeroId} accepted and updated.`);
