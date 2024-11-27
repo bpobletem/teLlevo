@@ -42,7 +42,6 @@ export class DetalleViajePage implements OnInit {
       console.error('No se recibió el objeto viaje en NavigationExtras');
     }
 
-    await this.firebaseSrv.checkAndClearSession();
     const user = await this.storageSrv.getUserFromSesion();
     this.pasajeroId = user.uid
     console.log('Pasajero ID:', this.pasajeroId);
