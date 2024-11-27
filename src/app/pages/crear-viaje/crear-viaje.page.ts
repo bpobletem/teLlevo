@@ -108,7 +108,7 @@ export class CrearViajePage implements OnInit {
       fechaSalida: ['', [Validators.required, this.dateRangeValidator()]],
       precio: [0, [Validators.required, Validators.min(500)]],
       auto: [null, Validators.required],
-      asientosDisponibles: [0, [Validators.required, Validators.min(1)]],
+      asientosDisponibles: [0, [Validators.required, Validators.min(1), Validators.max(15)]],
       uid: ['']
     });
   }
