@@ -30,4 +30,17 @@ export class StorageService {
   public async remove(key:string){
     await this._storage?.remove(key);
   }
+
+  async getUserFromSesion() {
+    const correo = await this.get('sesion');
+    console.log('Retrieved uid from storage:', correo);
+  
+    if (!correo) {
+      console.error('No correo found in storage');
+      return null;
+    }
+
+    const user = await this.get(correo);
+    return user;
+  }
 }
