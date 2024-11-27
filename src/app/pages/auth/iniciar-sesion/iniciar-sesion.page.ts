@@ -49,7 +49,7 @@ export class IniciarSesionPage implements OnInit {
       // Offline login
       if (this.form.value.correo === storedUser.correo && this.form.value.password === storedPassword) {
         this.localStorageSrv.set('sesion', this.form.value.correo);
-        console.log('navegando');
+        loading.dismiss();
         this.router.navigate(['/home']);
       } else {
         this.errorMessage = 'Invalid credentials for offline login';
@@ -63,9 +63,9 @@ export class IniciarSesionPage implements OnInit {
         });
         await this.localStorageSrv.set('sesion', this.form.value.correo);
         this.getUser(res.user.uid);
-        await loading.dismiss();
+        loading.dismiss();
       }).catch(async error => {
-        await loading.dismiss();
+        loading.dismiss();
         this.errorMessage = 'Error logging in: ' + error.message;
       });
     }
