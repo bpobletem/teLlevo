@@ -43,7 +43,8 @@ export class DetalleViajePage implements OnInit {
     }
 
     await this.firebaseSrv.checkAndClearSession();
-    this.pasajeroId = await this.storageSrv.get('sesion');
+    const user = await this.storageSrv.getUserFromSesion();
+    this.pasajeroId = user.uid
     console.log('Pasajero ID:', this.pasajeroId);
 
     this.mapService.cbAddress.subscribe((destino: string) => {
