@@ -51,18 +51,7 @@ export class PerfilPage implements OnInit {
     const loading = await this.utilsSrv.loading();
     await loading.present();
   
-    const correo = await this.storageSrv.get('sesion');
-    console.log('Retrieved uid from storage:', correo);
-  
-    if (!correo) {
-      console.error('No correo found in storage');
-      this.router.navigate(['/iniciar-sesion']);
-      await loading.dismiss();
-      return;
-    }
-
-    const user = await this.storageSrv.get(correo);
-    console.log(user)
+    const user = await this.storageSrv.getUserFromSesion();
     this.currentUser = user as Usuario;
     loading.dismiss()
   }
