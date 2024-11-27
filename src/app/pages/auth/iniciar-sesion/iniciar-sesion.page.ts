@@ -32,47 +32,47 @@ export class IniciarSesionPage implements OnInit {
   }
 
   ngOnInit(): void {
-    
+
   }
 
   async submit() {
-  if (this.form.valid) {
-    const loading = await this.utilsSrv.loading();
-    await loading.present();
+    if (this.form.valid) {
+      const loading = await this.utilsSrv.loading();
+      await loading.present();
 
-    const storedUser = await this.localStorageSrv.get(`${this.form.value.correo}`);
-    const storedPassword = storedUser?.password;
-    console.log(storedUser);
-    console.log(storedPassword);
+      const storedUser = await this.localStorageSrv.get(`${this.form.value.correo}`);
+      const storedPassword = storedUser?.password;
+      console.log(storedUser);
+      console.log(storedPassword);
 
-    if (storedUser && storedPassword) {
-      // Offline login
-      if (this.form.value.correo === storedUser.correo && this.form.value.password === storedPassword) {
-        this.localStorageSrv.set('sesion', this.form.value.correo);
-        loading.dismiss();
-        this.router.navigate(['/home']);
+      if (storedUser && storedPassword) {
+        // Offline login
+        if (this.form.value.correo === storedUser.correo && this.form.value.password === storedPassword) {
+          this.localStorageSrv.set('sesion', this.form.value.correo);
+          loading.dismiss();
+          this.router.navigate(['/home']);
+        } else {
+          this.errorMessage = 'Invalid credentials for offline login';
+        }
       } else {
-        this.errorMessage = 'Invalid credentials for offline login';
+        // Online login
+        this.firebaseSrv.signIn(this.form.value as Usuario).then(async res => {
+          this.localStorageSrv.set(this.form.value.correo, {
+            correo: this.form.value.correo,
+            password: this.form.value.password
+          });
+          this.localStorageSrv.set('sesion', this.form.value.correo);
+          this.getUser(res.user.uid);
+          loading.dismiss();
+        }).catch(async error => {
+          loading.dismiss();
+          this.errorMessage = 'Error logging in: ' + error.message;
+        });
       }
     } else {
-      // Online login
-      this.firebaseSrv.signIn(this.form.value as Usuario).then(async res => {
-        await this.localStorageSrv.set(this.form.value.correo, {
-          correo: this.form.value.correo,
-          password: this.form.value.password
-        });
-        await this.localStorageSrv.set('sesion', this.form.value.correo);
-        this.getUser(res.user.uid);
-        loading.dismiss();
-      }).catch(async error => {
-        loading.dismiss();
-        this.errorMessage = 'Error logging in: ' + error.message;
-      });
+      this.errorMessage = 'Please fill in all required fields';
     }
-  } else {
-    this.errorMessage = 'Please fill in all required fields';
   }
-}
 
   async getUser(uid: string) {
     if (this.form.valid) {
@@ -81,31 +81,31 @@ export class IniciarSesionPage implements OnInit {
 
       let path = `Usuario/${uid}`;
 
-      this.firebaseSrv.getDocument(path).then( (user: Usuario) => {
-          this.localStorageSrv.set('sesion', this.form.value.correo);
-          this.localStorageSrv.set(this.form.value.correo, user);
-          this.router.navigate(['/home']);
-          this.form.reset();
+      this.firebaseSrv.getDocument(path).then((user: Usuario) => {
+        this.localStorageSrv.set('sesion', this.form.value.correo);
+        this.localStorageSrv.set(this.form.value.correo, user);
+        this.router.navigate(['/home']);
+        this.form.reset();
 
-          this.utilsSrv.presentToast({
-            message: `Bienvenido, ${user.nombre}`,
-            duration: 1500,
-            color: 'primary',
-            position: 'bottom',
-            icon: 'person-circle-outline'
-          });
-        }).catch(error => {
-          this.utilsSrv.presentToast({
-            message: error.message,
-            duration: 2500,
-            color: 'primary',
-            position: 'bottom',
-            icon: 'alert-circle-outline'
-          });
-          console.log(error);
-        }).finally(() => {
-          loading.dismiss();
+        this.utilsSrv.presentToast({
+          message: `Bienvenido, ${user.nombre}`,
+          duration: 1500,
+          color: 'primary',
+          position: 'bottom',
+          icon: 'person-circle-outline'
         });
+      }).catch(error => {
+        this.utilsSrv.presentToast({
+          message: error.message,
+          duration: 2500,
+          color: 'primary',
+          position: 'bottom',
+          icon: 'alert-circle-outline'
+        });
+        console.log(error);
+      }).finally(() => {
+        loading.dismiss();
+      });
     }
   }
 }
