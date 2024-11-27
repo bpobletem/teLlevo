@@ -7,7 +7,6 @@ import { FieldValue, arrayUnion } from 'firebase/firestore';
 import { UtilsService } from 'src/app/services/utils.service';
 import { AlertController } from '@ionic/angular';
 
-
 @Component({
   selector: 'app-solicitudes-viaje',
   templateUrl: './solicitudes-de-viaje.page.html',
@@ -22,7 +21,6 @@ export class SolicitudesDeViajePage implements OnInit {
   constructor(
     private router: Router,
     private firebaseSrv: FirebaseService,
-    private mapService: MapService,
     private alertController: AlertController,
   ) {}
 
@@ -40,8 +38,8 @@ export class SolicitudesDeViajePage implements OnInit {
 
   cargarSolicitudes() {
     this.firebaseSrv.getCollectionChanges<SolicitudesViaje>('SolicitudesViaje').subscribe((solicitudes) => {
-      this.solicitudes = solicitudes.filter(solicitud => 
-        solicitud.viajeId === this.viajeId && solicitud.estado === 'pendiente'
+      this.solicitudes = solicitudes.filter(
+        (solicitud) => solicitud.viajeId === this.viajeId && solicitud.estado === EstadoSolicitud.pendiente
       );
     });
   }
@@ -52,8 +50,6 @@ export class SolicitudesDeViajePage implements OnInit {
       if (viaje) {
         this.viaje = viaje as Viaje;
         console.log('Detalles del viaje cargados:', this.viaje);
-      } else {
-        console.error('Error: No se encontraron detalles del viaje.');
       }
     } catch (error) {
       console.error('Error al cargar detalles del viaje:', error);
@@ -62,64 +58,65 @@ export class SolicitudesDeViajePage implements OnInit {
 
   async aceptarSolicitud(solicitud: SolicitudesViaje) {
     try {
-      // Get coordinates for the stop
-      const coords = await this.mapService.getCoordsFromAddress(solicitud.parada);
-      if (!coords) {
-        throw new Error('Invalid coordinates for the given address');
-      }
-  
-      console.log('Adding stop coordinates:', coords);
-  
-      // Add the stop to the map and update Firebase
-      await this.mapService.addStop(coords, this.viajeId);
-  
-      // Update the state of the solicitud to approved
-      await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, {
-        estado: EstadoSolicitud.aprobado,
-      });
-
-      // Retrieve the current value of asientosDisponibles
       const viajeDoc = await this.firebaseSrv.getDocument(`Viajes/${this.viajeId}`);
       const currentAsientosDisponibles = viajeDoc['asientosDisponibles'];
       if (currentAsientosDisponibles <= 0) {
         throw new Error('No available seats');
       }
       const newAsientosDisponibles = currentAsientosDisponibles - 1;
-  
-      // Add the stop to the rutas field in Viajes
-      await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
-        rutas: arrayUnion({ lng: coords[0], lat: coords[1] }),
-        pasajeros: arrayUnion(solicitud.pasajeroId), // Add the passenger to the trip
-        asientosDisponibles: newAsientosDisponibles
+
+      await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, {
+        estado: EstadoSolicitud.aprobado,
       });
-  
-      console.log(`Solicitud for pasajero ${solicitud.pasajeroId} accepted and updated.`);
+
+      await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
+        pasajeros: arrayUnion(solicitud.pasajeroId),
+        asientosDisponibles: newAsientosDisponibles,
+      });
+
+      this.utilsSrv.presentToast({
+        message: 'Solicitud aceptada con éxito',
+        duration: 2000,
+        color: 'success',
+      });
     } catch (error) {
       console.error('Error accepting solicitud:', error);
     }
   }
-  
 
   async rechazarSolicitud(solicitud: SolicitudesViaje) {
     try {
-      await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, { estado: 'rechazado' });
-      this.solicitudes = this.solicitudes.filter(s => s !== solicitud);
+      await this.firebaseSrv.updateDocument(`SolicitudesViaje/${solicitud.viajeId + solicitud.pasajeroId}`, {
+        estado: EstadoSolicitud.rechazado,
+      });
+      this.solicitudes = this.solicitudes.filter((s) => s !== solicitud);
+      this.utilsSrv.presentToast({
+        message: `Solicitud de ${solicitud.pasajeroId} rechazada.`,
+        duration: 2000,
+        color: 'warning',
+      });
     } catch (error) {
       console.error('Error al rechazar la solicitud:', error);
+      this.utilsSrv.presentToast({
+        message: 'Error al rechazar la solicitud',
+        duration: 2000,
+        color: 'danger',
+      });
     }
   }
 
- async iniciarViaje() {
-    setTimeout(() => {
+  async iniciarViaje() {
+    try {
+      await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
+        estado: estadoViaje.enCurso,
+      });
       const navigationExtras: NavigationExtras = { state: { viajeId: this.viajeId } };
       this.router.navigate(['/viaje-en-curso'], navigationExtras);
-    }, 2000); // Delay to allow Firebase to sync
-
-    await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
-      estado: estadoViaje.enCurso
-    });
+    } catch (error) {
+      console.error('Error al iniciar el viaje:', error);
+    }
   }
-  
+
   async cancelarViaje() {
     const alert = await this.alertController.create({
       header: 'Confirmar cancelación',
@@ -127,26 +124,22 @@ export class SolicitudesDeViajePage implements OnInit {
       buttons: [
         {
           text: 'No',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Sí, cancelar',
           handler: async () => {
-            const loading = await this.utilsSrv.loading();
-            await loading.present();
-  
             try {
               await this.firebaseSrv.updateDocument(`Viajes/${this.viajeId}`, {
-                estado: estadoViaje.cancelado
+                estado: estadoViaje.cancelado,
               });
-  
+
               this.utilsSrv.presentToast({
                 message: 'Viaje cancelado exitosamente',
                 duration: 2000,
                 color: 'primary',
-                position: 'bottom'
               });
-  
+
               this.router.navigate(['/historial-viajes']);
             } catch (error) {
               console.error('Error al cancelar el viaje:', error);
@@ -154,17 +147,13 @@ export class SolicitudesDeViajePage implements OnInit {
                 message: 'Error al cancelar el viaje',
                 duration: 2000,
                 color: 'danger',
-                position: 'bottom'
               });
-            } finally {
-              loading.dismiss();
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
-  
+
     await alert.present();
   }
-  
 }

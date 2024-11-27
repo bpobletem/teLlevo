@@ -2,15 +2,14 @@
 
 <ion-content class="ion-padding">
   <ion-list *ngIf="viajes.length > 0; else noTrips">
-    <ion-item *ngFor="let viaje of viajes" class="ion-margin-end" (click)="unirseAlViaje(viaje)">
-      <ion-card>
-        <!-- podriamos reemplazar el texto por un mapa -->
+    <ion-item *ngFor="let viaje of viajes" class="ion-margin-end">
+      <ion-card (click)="solicitarUnirseAlViaje(viaje)">
         <ion-card-header>
-          <ion-card-title>{{viaje.destino}}</ion-card-title>
+          <ion-card-title>{{ viaje.destino }}</ion-card-title>
         </ion-card-header>
         <ion-card-content>
           <p>Piloto: {{ viaje.piloto.nombre }}</p>
-          <p>Auto: {{ viaje.auto.marca }} {{ viaje.auto.modelo }} </p>
+          <p>Auto: {{ viaje.auto.marca }} {{ viaje.auto.modelo }}</p>
           <p>Precio: ${{ viaje.precio }}</p>
           <p>Fecha: {{ viaje.fechaSalida | date: 'dd/MM/yyyy' }}</p>
         </ion-card-content>

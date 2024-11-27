@@ -11,7 +11,7 @@ import { StorageService } from 'src/app/services/storage.service';
   styleUrls: ['./viaje-en-curso.page.scss'],
 })
 export class ViajeEnCursoPage implements OnInit, AfterViewInit {
-  viaje: any = {}; // Datos actuales del viaje
+  viaje: any = {};
   esPiloto: boolean = false;
   mapInitialized: boolean = false;
 
@@ -25,80 +25,69 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
   async ngOnInit() {
     console.log('ngOnInit: Component initialized');
 
-    // Check navigation state for viajeId
     const nav = this.router.getCurrentNavigation();
     const viajeId = nav?.extras?.state?.['viajeId'];
-    console.log('ngOnInit: Navigation state:', nav?.extras?.state);
-
     if (viajeId) {
-      console.log('ngOnInit: Loading trip with ID:', viajeId);
       await this.loadViajeById(viajeId);
     } else {
-      console.error('ngOnInit: No viajeId found in navigation state');
+      console.error('No viajeId found');
+      this.router.navigate(['/home']);
     }
 
-    // Check if the current user is the pilot
     const currentUserUid = await this.storageSrv.get('sesion');
-    console.log('ngOnInit: Current user UID:', currentUserUid);
-
     this.esPiloto = currentUserUid === this.viaje?.piloto?.uid;
-    console.log('ngOnInit: Is current user the pilot?', this.esPiloto);
+  }
+
+  async initializeMapWithRoutes() {
+    if (!this.mapInitialized) {
+      // Inicializa el mapa
+      await this.mapService.buildMap('mapContainer');
+      this.mapInitialized = true;
+  
+      console.log('Rutas disponibles:', this.viaje.rutas);
+  
+      // Dibuja la ruta
+      const route = this.viaje.rutas.map((parada: any) => [parada.lng, parada.lat]);
+      if (route.length > 1) {
+        this.mapService.drawRouteOnMap(route, 'route');
+        console.log('Ruta dibujada:', route);
+      } else {
+        console.warn('No se puede dibujar una ruta con menos de dos puntos.');
+      }
+    }
   }
 
   async ngAfterViewInit() {
-    console.log('ngAfterViewInit: View initialized');
+    console.log('ngAfterViewInit: Inicializando el mapa y rutas...');
     if (this.viaje?.rutas && this.viaje.rutas.length > 0) {
-      // Initialize map with routes after DOM is fully ready
       await this.initializeMapWithRoutes();
-    }
+    } else {
+
   }
+} 
 
   async loadViajeById(viajeId: string) {
-    console.log('loadViajeById: Fetching trip details for ID:', viajeId);
-
     try {
       const viaje = await this.firebaseSrv.getDocumentById('Viajes', viajeId);
       if (viaje) {
         this.viaje = viaje;
-        console.log('loadViajeById: Trip details loaded:', this.viaje);
-
-        // Initialize map if not already initialized
-        if (this.viaje.rutas && this.viaje.rutas.length > 0 && !this.mapInitialized) {
-          await this.initializeMapWithRoutes();
+        console.log('Detalles del viaje cargados:', this.viaje);
+  
+        if (!this.viaje.rutas || this.viaje.rutas.length === 0) {
+          console.warn('Las rutas del viaje están vacías.');
         }
-      } else {
-        console.error('loadViajeById: No trip found for the given ID');
       }
     } catch (error) {
-      console.error('loadViajeById: Error fetching trip details:', error);
+      console.error('Error fetching trip details:', error);
     }
   }
-
-  async initializeMapWithRoutes() {
-    if (this.mapInitialized) {
-      console.warn("Map is already initialized.");
-      return;
-    }
-
-    try {
-      console.log('initializeMapWithRoutes: Initializing map with routes');
-      await this.mapService.buildMap('mapContainer'); // Wait for the map to be built
-      this.mapInitialized = true;
-
-      // Ensure map updates happen after it is fully initialized
-      this.mapService.stops = this.viaje.rutas.map((parada: any) => [parada.lng, parada.lat]);
-      this.mapService.updateRoute();
-      console.log('initializeMapWithRoutes: Route updated on the map');
-    } catch (error) {
-      console.error('initializeMapWithRoutes: Error initializing map with routes', error);
-    }
-  }
-
+    
+  
   finalizarViaje() {
     if (this.viaje.id && this.esPiloto) {
       this.firebaseSrv.updateDocument(`Viajes/${this.viaje.id}`, { estado: estadoViaje.finalizado })
         .then(() => this.router.navigate(['/home']))
-        .catch(error => console.error('Error finalizando el viaje:', error));
+        .catch((error) => console.error('Error finalizando el viaje:', error));
     }
   }
 
@@ -106,12 +95,12 @@ export class ViajeEnCursoPage implements OnInit, AfterViewInit {
     if (this.viaje.id) {
       this.firebaseSrv.updateDocument(`Viajes/${this.viaje.id}`, { estado: estadoViaje.cancelado })
         .then(() => this.router.navigate(['/home']))
-        .catch(error => console.error('Error cancelando el viaje:', error));
+        .catch((error) => console.error('Error cancelando el viaje:', error));
     }
   }
 
   verHistorial() {
-    const showPiloto = this.esPiloto;
+    const showPiloto = this.esPiloto !== undefined ? this.esPiloto : false;
     this.router.navigate(['/historial-viajes'], { state: { showPiloto } });
   }
 }

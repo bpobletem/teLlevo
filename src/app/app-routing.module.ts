@@ -64,10 +64,6 @@ const routes: Routes = [
     loadChildren: () => import('./pages/solicitudes-de-viaje/solicitudes-de-viaje.module').then( m => m.SolicitudesDeViajePageModule)
   },
   {
-    path: 'detalle-viaje',
-    loadChildren: () => import('./pages/detalle-viaje/detalle-viaje.module').then( m => m.DetalleViajePageModule)
-  },
-  {
     path: 'editar-perfil',
     loadChildren: () => import('./pages/editar-perfil/editar-perfil.module').then( m => m.EditarPerfilPageModule)
   },
