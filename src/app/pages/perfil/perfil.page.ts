@@ -51,31 +51,19 @@ export class PerfilPage implements OnInit {
     const loading = await this.utilsSrv.loading();
     await loading.present();
   
-    const uid = await this.storageSrv.get('sesion');
-    console.log('Retrieved uid from storage:', uid);
+    const correo = await this.storageSrv.get('sesion');
+    console.log('Retrieved uid from storage:', correo);
   
-    if (!uid) {
-      console.error('No uid found in storage');
+    if (!correo) {
+      console.error('No correo found in storage');
       this.router.navigate(['/iniciar-sesion']);
       await loading.dismiss();
       return;
     }
-  
-    this.firebaseSrv.getDocument(`Usuario/${uid}`)
-      .then(user => {
-        if (user) {
-          console.log('User document:', user);
-          this.currentUser = user as Usuario;
-          console.log('Current user:', this.currentUser);
-        } else {
-          console.error('Usuario no encontrado');
-        }
-      })
-      .catch(error => {
-        console.error('Error al cargar el usuario:', error);
-      })
-      .finally(() => {
-        loading.dismiss();
-      });
+
+    const user = await this.storageSrv.get(correo);
+    console.log(user)
+    this.currentUser = user as Usuario;
+    loading.dismiss()
   }
 }
