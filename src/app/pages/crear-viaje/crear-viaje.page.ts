@@ -36,20 +36,14 @@ export class CrearViajePage implements OnInit {
     await loading.present();
   
     try {
-      // Step 1: Initialize form
       await this.inicializarFormulario();
-      // Step 2: Get user session
-      this.uid = await this.localStorageSrv.get('sesion');
-      if (!this.uid) {
-        throw new Error('No user session found');
-      }
-      // Step 3: Load current user
-      await this.cargarUsuarioActual();
-      // Step 4: Load user's cars
+      
+      this.usuarioActual = await this.localStorageSrv.getUserFromSesion();
+      
       await new Promise<void>((resolve, reject) => {
         this.firebaseSrv.getCollectionChanges<Auto>('Auto').subscribe({
           next: (autos) => {
-            this.autos = autos.filter((auto) => auto.propietario === `Usuario/${this.uid}`);
+            this.autos = autos.filter((auto) => auto.propietario === `Usuario/${this.usuarioActual.uid}`);
             resolve();
           },
           error: (error) => reject(error)
@@ -111,24 +105,6 @@ export class CrearViajePage implements OnInit {
       asientosDisponibles: [0, [Validators.required, Validators.min(1), Validators.max(15)]],
       uid: ['']
     });
-  }
-
-  async cargarUsuarioActual(): Promise<void> {
-    try {
-      const uid = await this.localStorageSrv.get('sesion');
-      if (uid) {
-        const pathUsuario = `Usuario/${uid}`;
-        this.usuarioActual = await this.firebaseSrv.getDocument(pathUsuario) as Usuario;
-      }
-    } catch (error) {
-      console.error('Error al cargar el usuario:', error);
-      this.utilsSrv.presentToast({
-        message: 'Error al cargar los datos del usuario.',
-        duration: 2500,
-        color: 'danger',
-        position: 'bottom'
-      });
-    }
   }
 
   async crearViaje() {

@@ -26,8 +26,9 @@ export class HistorialViajesPage implements OnInit {
   }
 
   async ionViewWillEnter(){
-    const userId = await this.localStorageSrv.get('sesion');
-    const viajes = await this.firebaseSrv.getDocumentsByPilotOrPassengerUid('Viajes', userId);
+    const user = await this.localStorageSrv.getUserFromSesion()
+    this.subscribeToViajes(user.uid);
+    const viajes = await this.firebaseSrv.getDocumentsByPilotOrPassengerUid('Viajes', user.uid);
     const {pilotResults, passengerResults} = viajes;
     this.viajesPiloto = pilotResults;
     this.viajesPasajero = passengerResults;
@@ -56,6 +57,21 @@ export class HistorialViajesPage implements OnInit {
       default:
         return 'primary';
     }
+  }
+
+  subscribeToViajes(uid: string) {
+    this.firebaseSrv.getCollectionChanges('Viajes').subscribe({
+      next: (viajes: any[]) => {
+        const pilotResults = viajes.filter(viaje => viaje.piloto.uid === uid);
+        const passengerResults = viajes.filter(viaje => viaje.pasajeros.includes(uid));
+        this.viajesPiloto = pilotResults;
+        this.viajesPasajero = passengerResults;
+        console.log('Updated viajes:', { pilotResults, passengerResults });
+      },
+      error: (error) => {
+        console.error('Error fetching viajes:', error);
+      }
+    });
   }
 
   goToSolicitudes(viaje: Viaje) {

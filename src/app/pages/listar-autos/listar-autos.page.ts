@@ -6,6 +6,7 @@ import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import { StorageService } from 'src/app/services/storage.service';
 import { Auto } from 'src/app/interfaces/interfaces';
+import { UtilsService } from 'src/app/services/utils.service';
 addIcons({ add });
 
 @Component({
@@ -18,16 +19,22 @@ export class ListarAutosPage implements OnInit {
   firebaseSrv = inject(FirebaseService);  // Inyectamos FirebaseService
   storageSrv = inject(StorageService);
   uid = '';
+  utilsSrv = inject(UtilsService);
   constructor(private alertController: AlertController, private router: Router) {
     addIcons({ add });
   }
 
   async ngOnInit() {
-    this.uid = await this.storageSrv.get('sesion');
+    const loading = await this.utilsSrv.loading();
+    await loading.present();
+  
+    const user = await this.storageSrv.getUserFromSesion();
+    this.uid = user.uid
     this.firebaseSrv.getCollectionChanges<Auto>('Auto').subscribe((autos) => {
       console.log(this.uid)
       this.autos = autos.filter((auto) => auto.propietario === `Usuario/${this.uid}`);
     });
+    loading.dismiss()
   }
 
 
