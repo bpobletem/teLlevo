@@ -3,6 +3,7 @@ import * as mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { FirebaseService } from 'src/app/services/firebase.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,19 +13,19 @@ export class MapService {
   mapbox = (mapboxgl as any);
   map!: mapboxgl.Map;
   style = 'mapbox://styles/mapbox/streets-v11';
-  lat = -36.79517; // Coordenadas iniciales del origen (por ejemplo, DUOC)
+  lat = -36.79517; // Coordenadas de DUOC
   lng = -73.06259;
   zoom = 15;
-  origin: [number, number] = [this.lng, this.lat]; // Origen inicial
-  destination: [number, number] | null = null; // Destino seleccionado
+  destinationMarker: mapboxgl.Marker | null = null; // Para un único destino
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private httpClient: HttpClient, private firebaseSrv: FirebaseService) {
     this.mapbox.accessToken = environment.mapKey;
   }
 
   async buildMap(containerId: string): Promise<any> {
     return new Promise((resolve, reject) => {
       try {
+        // Limpiar el contenedor del mapa
         const container = document.getElementById(containerId);
         if (container) {
           while (container.firstChild) {
@@ -32,20 +33,23 @@ export class MapService {
           }
         }
 
+        // Inicializar el mapa
         this.map = new mapboxgl.Map({
           container: containerId,
           style: this.style,
           zoom: this.zoom,
-          center: this.origin, // Centrar en el origen inicial
+          center: [this.lng, this.lat],
         });
 
+        // Esperar a que el estilo cargue antes de proceder
         this.map.on('load', () => {
           console.log('Mapa cargado correctamente.');
 
-          // Agregar marcador en el origen
-          this.addMarker(this.origin, 'driver');
+          // Agregar marcador inicial en DUOC
+          const startCoords: [number, number] = [this.lng, this.lat];
+          this.addMarker(startCoords, 'driver');
 
-          // Agregar control para buscar el destino
+          // Agregar el geocoder para seleccionar un destino
           const geocoder = new MapboxGeocoder({
             accessToken: this.mapbox.accessToken,
             mapboxgl: mapboxgl,
@@ -55,19 +59,34 @@ export class MapService {
           });
           this.map.addControl(geocoder);
 
-          // Manejar selección de destino
-          geocoder.on('result', (event) => {
-            this.destination = event.result.center as [number, number];
-            this.addMarker(this.destination, 'destination');
-            this.drawRoute(this.origin, this.destination);
-            this.cbAddress.emit(event.result.place_name); // Emitir la dirección seleccionada
+          // Manejar el resultado del geocoder (selección de destino)
+          geocoder.on('result', async (event) => {
+            const destinationCoords = event.result.center;
+
+            // Actualizar marcador de destino único
+            if (this.destinationMarker) {
+              this.destinationMarker.remove(); // Quitar el marcador anterior si existe
+            }
+            this.destinationMarker = new mapboxgl.Marker()
+              .setLngLat(destinationCoords)
+              .addTo(this.map);
+
+            // Dibujar la ruta desde DUOC hasta el destino seleccionado
+            try {
+              const route = await this.getRoute(startCoords, destinationCoords);
+              this.updateRouteOnMap(route); // Dibuja la ruta en el mapa
+              this.cbAddress.emit(event.result.place_name); // Emitir la dirección seleccionada
+            } catch (error) {
+              console.error('Error al calcular la ruta:', error);
+            }
           });
 
-          resolve(this.map);
+          // Resolver la promesa después de configurar el mapa y el geocoder
+          resolve({ map: this.map, geocoder });
         });
 
         this.map.on('error', (error) => {
-          console.error('Error cargando el mapa:', error);
+          console.error('Error en el mapa:', error);
           reject(error);
         });
       } catch (error) {
@@ -76,40 +95,54 @@ export class MapService {
     });
   }
 
+  async buildMapFromData(containerId: string, viaje: any): Promise<void> {
+    const { rutas, center, zoom } = viaje;
+  
+    // Limpiar el contenedor del mapa
+    const container = document.getElementById(containerId);
+    if (container) {
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+    }
+  
+    // Inicializar el mapa
+    this.map = new mapboxgl.Map({
+      container: containerId,
+      style: this.style,
+      zoom: zoom || 15,
+      center: [center.lng, center.lat],
+    });
+  
+    await new Promise<void>((resolve, reject) => {
+      this.map.on('load', () => resolve());
+      this.map.on('error', (error) => reject(error));
+    });
+  
+    // Dibujar la ruta
+    const route = rutas.map((r: any) => [r.lng, r.lat]);
+    this.updateRouteOnMap(route);
+  
+    // Agregar marcadores
+    this.addMarker(route[0], 'driver'); // Marcador de inicio
+    this.addMarker(route[route.length - 1], 'destination'); // Marcador de destino
+  }
+  
+  
   addMarker(coords: [number, number], type: 'driver' | 'destination'): void {
-    const color = type === 'driver' ? 'blue' : 'red';
-    new mapboxgl.Marker({ color }).setLngLat(coords).addTo(this.map);
+    new mapboxgl.Marker().setLngLat(coords).addTo(this.map);
   }
-
-  drawRoute(origin: [number, number], destination: [number, number]): void {
-    if (!origin || !destination) {
-      console.warn('Origen o destino no definidos.');
-      return;
+  
+  updateRouteOnMap(route: [number, number][]): void {
+    // Limpiar la capa de ruta anterior, si existe
+    const routeLayerId = 'routeLayer';
+    if (this.map.getSource(routeLayerId)) {
+      this.map.removeLayer(routeLayerId);
+      this.map.removeSource(routeLayerId);
     }
 
-    const coordinates = `${origin.join(',')};${destination.join(',')}`;
-    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?steps=true&geometries=geojson&access_token=${this.mapbox.accessToken}`;
-
-    this.httpClient.get(url).subscribe(
-      (res: any) => {
-        if (res?.routes?.[0]?.geometry?.coordinates) {
-          const route = res.routes[0].geometry.coordinates;
-          this.drawRouteOnMap(route, 'route');
-        } else {
-          console.error('No se encontró una ruta válida:', res);
-        }
-      },
-      (error) => console.error('Error al obtener la ruta:', error)
-    );
-  }
-
-  drawRouteOnMap(route: [number, number][], layerId: string): void {
-    if (this.map.getSource(layerId)) {
-      this.map.removeLayer(layerId);
-      this.map.removeSource(layerId);
-    }
-
-    this.map.addSource(layerId, {
+    // Agregar nueva capa de ruta
+    this.map.addSource(routeLayerId, {
       type: 'geojson',
       data: {
         type: 'Feature',
@@ -122,21 +155,48 @@ export class MapService {
     });
 
     this.map.addLayer({
-      id: layerId,
+      id: routeLayerId,
       type: 'line',
-      source: layerId,
+      source: routeLayerId,
       layout: {
         'line-join': 'round',
         'line-cap': 'round',
       },
       paint: {
         'line-color': '#1db7dd',
-        'line-width': 4,
+        'line-width': 5,
       },
     });
 
+    // Ajustar el mapa para incluir la ruta completa
     const bounds = new mapboxgl.LngLatBounds();
     route.forEach((coord) => bounds.extend(coord));
-    this.map.fitBounds(bounds, { padding: 50, maxZoom: 12 });
+    this.map.fitBounds(bounds, { padding: 50, maxZoom: 15 });
   }
+
+  async updateFirebaseRoutes(viajeId: string, rutas: { lat: number; lng: number }[]): Promise<void> {
+    try {
+      await this.firebaseSrv.updateDocument(`Viajes/${viajeId}`, { rutas });
+      console.log('Rutas actualizadas en Firebase:', rutas);
+    } catch (error) {
+      console.error('Error updating routes in Firebase:', error);
+    }
+  }  
+
+  async getRoute(start: [number, number], end: [number, number]): Promise<[number, number][]> {
+    const coordinates = `${start.join(',')};${end.join(',')}`;
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?geometries=geojson&access_token=${this.mapbox.accessToken}`;
+  
+    try {
+      const response: any = await this.httpClient.get(url).toPromise();
+      if (response?.routes?.[0]?.geometry?.coordinates) {
+        return response.routes[0].geometry.coordinates;
+      } else {
+        throw new Error('No se encontró una ruta válida');
+      }
+    } catch (error) {
+      console.error('Error al obtener la ruta desde Mapbox:', error);
+      throw error;
+    }
+  }  
 }

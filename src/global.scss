@@ -29,6 +29,12 @@
 @import 'mapbox-gl/dist/mapbox-gl.css';
 @import '~@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
+#mapContainer {
+    height: 300px; 
+    width: 100%;
+    background-color: #f0f0f0; 
+  }
+  
 /**
  * Ionic Dark Mode
  * -----------------------------------------------------

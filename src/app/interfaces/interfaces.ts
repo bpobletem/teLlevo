@@ -31,6 +31,8 @@ export interface Viaje {
     auto: Auto;            
     precio: number;             
     rutas?: { lat: number; lng: number }[]; 
+    center?: { lat: number; lng: number };
+    zoom: number;
 }
 
 export interface Auto {
