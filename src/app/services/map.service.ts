@@ -96,6 +96,11 @@ export class MapService {
   }
 
   async buildMapFromData(containerId: string, viaje: any): Promise<void> {
+    // Validar datos necesarios antes de inicializar el mapa
+    if (!viaje || !viaje.rutas || !viaje.center || !viaje.zoom) {
+      return Promise.reject(new Error('Datos incompletos para construir el mapa.'));
+    }
+  
     const { rutas, center, zoom } = viaje;
   
     // Limpiar el contenedor del mapa
@@ -114,6 +119,7 @@ export class MapService {
       center: [center.lng, center.lat],
     });
   
+    // Esperar a que el mapa se cargue completamente
     await new Promise<void>((resolve, reject) => {
       this.map.on('load', () => resolve());
       this.map.on('error', (error) => reject(error));
@@ -127,7 +133,7 @@ export class MapService {
     this.addMarker(route[0], 'driver'); // Marcador de inicio
     this.addMarker(route[route.length - 1], 'destination'); // Marcador de destino
   }
-  
+    
   
   addMarker(coords: [number, number], type: 'driver' | 'destination'): void {
     new mapboxgl.Marker().setLngLat(coords).addTo(this.map);
