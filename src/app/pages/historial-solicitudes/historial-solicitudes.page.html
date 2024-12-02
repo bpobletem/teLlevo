@@ -7,9 +7,9 @@
         <ion-chip [color]="getColorByEstado(solicitud.estado)">
           <ion-label>{{ solicitud.estado }}</ion-label>
         </ion-chip>
-        <h3>Destino: {{ solicitud.viaje?.destino }}</h3>
+        <h3>Destino: {{ solicitud.viaje?.destino || 'Viaje no disponible' }}</h3>
         <p>Fecha de Viaje: {{ solicitud.viaje?.fechaSalida | date: 'shortDate' }}</p>
-        <p>Piloto: {{ solicitud.piloto.nombre }} {{ solicitud.piloto.apellido }}</p>
+        <p>Piloto: {{ solicitud.piloto?.nombre + solicitud.piloto?.apellido || 'Piloto no disponible' }}</p>
         <p>Parada: {{ solicitud.parada }}</p>
       </ion-label>
     </ion-item>

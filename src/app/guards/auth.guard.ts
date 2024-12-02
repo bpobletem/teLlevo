@@ -17,12 +17,14 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Promise<boolean | UrlTree> {
     const offlineSession = this.storageSrv.get('sesion');
-    if (offlineSession) {
-      return true; // Sesión offline válida
+    if (offlineSession === null) {
+      this.router.navigate(['/iniciar-sesion']);
+      return false;
     }
     const isAuthenticated = await this.firebaseService.checkAndClearSession();
     if (!isAuthenticated) {
-      return this.router.createUrlTree(['/iniciar-sesion']);
+      this.router.navigate(['/iniciar-sesion']);
+      return false;
     }
     return true;
   }
