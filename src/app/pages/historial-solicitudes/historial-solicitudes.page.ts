@@ -41,14 +41,23 @@ export class HistorialSolicitudesPage implements OnInit {
           const filteredSolicitudes = solicitudes.filter(solicitud => solicitud.pasajeroId === this.userId);
           console.log('Filtered solicitudes:', filteredSolicitudes);
   
-          for (const solicitud of filteredSolicitudes) {
+          const solicitudPromises = filteredSolicitudes.map(async (solicitud) => {
             const viaje = await this.firebaseSrv.getDocument(`Viajes/${solicitud.viajeId}`) as Viaje;
+            if (!viaje) {
+              console.error(`Viaje not found for ID: ${solicitud.viajeId}`);
+              return solicitud;
+            }
             const piloto = await this.firebaseSrv.getDocument(`Usuario/${viaje.piloto['uid']}`) as Usuario;
+            if (!piloto) {
+              console.error(`Piloto not found for UID: ${viaje.piloto['uid']}`);
+              return solicitud;
+            }
             solicitud.viaje = viaje;
             solicitud.piloto = piloto;
-          }
+            return solicitud;
+          });
   
-          this.solicitudesViaje = filteredSolicitudes;
+          this.solicitudesViaje = await Promise.all(solicitudPromises);
           console.log('Solicitudes with additional data:', this.solicitudesViaje);
         },
         error: (error) => {
