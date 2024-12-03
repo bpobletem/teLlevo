@@ -3,6 +3,7 @@ import { NavigationExtras, Router } from '@angular/router';
 import { estadoViaje, Viaje } from 'src/app/interfaces/interfaces';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { StorageService } from 'src/app/services/storage.service';
+import { UtilsService } from 'src/app/services/utils.service';
 
 @Component({
   selector: 'app-historial-viajes',
@@ -13,6 +14,7 @@ export class HistorialViajesPage implements OnInit {
 
   localStorageSrv = inject(StorageService);
   firebaseSrv = inject(FirebaseService);
+  utilsSrv = inject(UtilsService);
 
   isPiloto: boolean = true;
   isPasajero: boolean = true;
@@ -26,12 +28,15 @@ export class HistorialViajesPage implements OnInit {
   }
 
   async ionViewWillEnter(){
+    const loading = await this.utilsSrv.loading();
+    await loading.present();
     const user = await this.localStorageSrv.getUserFromSesion()
     this.subscribeToViajes(user.uid);
     const viajes = await this.firebaseSrv.getDocumentsByPilotOrPassengerUid('Viajes', user.uid);
     const {pilotResults, passengerResults} = viajes;
     this.viajesPiloto = pilotResults;
     this.viajesPasajero = passengerResults;
+    loading.dismiss();
   }
 
   showTrips(type: string) {
