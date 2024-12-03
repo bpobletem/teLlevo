@@ -117,4 +117,10 @@ export class ViajeEnCursoPage implements OnInit {
     const showPiloto = this.esPiloto !== undefined ? this.esPiloto : false;
     this.router.navigate(['/historial-viajes'], { state: { showPiloto } });
   }
+
+  refresh(event: any) {
+    console.log('Refresher triggered');
+  
+    window.location.reload(); 
+  }
 }

@@ -1,7 +1,18 @@
 <app-encabezado titulo="Viaje en Curso"></app-encabezado>
 
 <ion-content class="ion-padding">
-  <!-- Map container where the map will be displayed -->
+  <!-- Refresher Component -->
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content
+      pullingIcon="arrow-down-circle-outline"
+      refreshingSpinner="bubbles"
+      pullingText="Desliza para refrescar"
+      refreshingText="Actualizando..."
+    >
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Map container -->
   <div id="mapContainer"></div>
 
   <!-- Trip Information Section -->
