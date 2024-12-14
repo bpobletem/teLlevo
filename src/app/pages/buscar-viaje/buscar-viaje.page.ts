@@ -66,14 +66,10 @@ export class BuscarViajePage implements OnInit {
   }
 
   async solicitarUnirseAlViaje(viaje: Viaje) {
-    const pasajeroId = await this.storageSrv.get('sesion');
+    const user = await this.storageSrv.getUserFromSesion();
+    const pasajeroId = user.uid;
 
     if (!pasajeroId) {
-      this.utilsSrv.presentToast({
-        message: 'Debes iniciar sesión para unirte a un viaje.',
-        duration: 2000,
-        color: 'danger',
-      });
       return;
     }
 
@@ -99,6 +95,7 @@ export class BuscarViajePage implements OnInit {
                 duration: 2000,
                 color: 'success',
               });
+              this.router.navigate(['/historial-solicitudes']);
             } catch (error) {
               console.error('Error al enviar la solicitud:', error);
               this.utilsSrv.presentToast({
