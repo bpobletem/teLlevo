@@ -33,7 +33,6 @@ export class StorageService {
 
   async getUserFromSesion() {
     const correo = await this.get('sesion');
-    console.log('Retrieved uid from storage:', correo);
   
     if (!correo) {
       console.error('No correo found in storage');
