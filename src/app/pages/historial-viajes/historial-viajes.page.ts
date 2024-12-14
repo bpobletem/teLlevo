@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
-import { estadoViaje, Viaje } from 'src/app/interfaces/interfaces';
+import { estadoViaje, Usuario, Viaje } from 'src/app/interfaces/interfaces';
 import { FirebaseService } from 'src/app/services/firebase.service';
 import { StorageService } from 'src/app/services/storage.service';
 import { UtilsService } from 'src/app/services/utils.service';
@@ -18,6 +18,7 @@ export class HistorialViajesPage implements OnInit {
 
   isPiloto: boolean = true;
   isPasajero: boolean = true;
+  user: Usuario;
 
   viajesPiloto = [];
   viajesPasajero = [];
@@ -30,12 +31,32 @@ export class HistorialViajesPage implements OnInit {
   async ionViewWillEnter(){
     const loading = await this.utilsSrv.loading();
     await loading.present();
-    const user = await this.localStorageSrv.getUserFromSesion()
+    const user = await this.localStorageSrv.getUserFromSesion();
     this.subscribeToViajes(user.uid);
     const viajes = await this.firebaseSrv.getDocumentsByPilotOrPassengerUid('Viajes', user.uid);
-    const {pilotResults, passengerResults} = viajes;
-    this.viajesPiloto = pilotResults;
-    this.viajesPasajero = passengerResults;
+    const { pilotResults, passengerResults } = viajes;
+
+    // Sort viajes by date in descending order
+    this.viajesPiloto = (pilotResults as Viaje[]).sort((a, b) => new Date(b.fechaSalida).getTime() - new Date(a.fechaSalida).getTime());
+    this.viajesPasajero = (passengerResults as Viaje[]).sort((a, b) => new Date(b.fechaSalida).getTime() - new Date(a.fechaSalida).getTime());
+
+    // Store the last viaje
+    if (this.viajesPiloto.length > 0) {
+      await this.localStorageSrv.set('lastViaje', this.viajesPiloto[0]);
+    } else if (this.viajesPasajero.length > 0) {
+      await this.localStorageSrv.set('lastViaje', this.viajesPasajero[0]);
+    } else {
+      // Load the last viaje from local storage if no viajes are fetched
+      const lastViaje = await this.localStorageSrv.get('lastViaje');
+      if (lastViaje) {
+        if (lastViaje.piloto.uid === user.uid) {
+          this.viajesPiloto = [lastViaje];
+        } else if (lastViaje.pasajeros.some(pasajero => pasajero.uid === user.uid)) {
+          this.viajesPasajero = [lastViaje];
+        }
+      }
+    }
+
     loading.dismiss();
   }
 
@@ -65,13 +86,21 @@ export class HistorialViajesPage implements OnInit {
   }
 
   subscribeToViajes(uid: string) {
-    this.firebaseSrv.getCollectionChanges('Viajes').subscribe({
-      next: (viajes: any[]) => {
+    this.firebaseSrv.getCollectionChanges<Viaje>('Viajes').subscribe({
+      next: (viajes: Viaje[]) => {
         const pilotResults = viajes.filter(viaje => viaje.piloto.uid === uid);
-        const passengerResults = viajes.filter(viaje => viaje.pasajeros.includes(uid));
-        this.viajesPiloto = pilotResults;
-        this.viajesPasajero = passengerResults;
-        console.log('Updated viajes:', { pilotResults, passengerResults });
+        const passengerResults = viajes.filter(viaje => viaje.pasajeros.some(pasajero => pasajero.uid === this.user.uid));
+
+        // Sort viajes by date in descending order
+        this.viajesPiloto = (pilotResults as Viaje[]).sort((a, b) => new Date(b.fechaSalida).getTime() - new Date(a.fechaSalida).getTime());
+        this.viajesPasajero = (passengerResults as Viaje[]).sort((a, b) => new Date(b.fechaSalida).getTime() - new Date(a.fechaSalida).getTime());
+
+        // Store the last viaje
+        if (this.viajesPiloto.length > 0) {
+          this.localStorageSrv.set('lastViaje', this.viajesPiloto[0]);
+        } else if (this.viajesPasajero.length > 0) {
+          this.localStorageSrv.set('lastViaje', this.viajesPasajero[0]);
+        }
       },
       error: (error) => {
         console.error('Error fetching viajes:', error);
