@@ -30,7 +30,8 @@ export class BuscarViajePage implements OnInit {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      const currentUserId = await this.storageSrv.get('sesion');
+      const user = await this.storageSrv.getUserFromSesion();
+      const currentUserId = user.uid
       if (!currentUserId) {
         throw new Error('No user session found');
       }
