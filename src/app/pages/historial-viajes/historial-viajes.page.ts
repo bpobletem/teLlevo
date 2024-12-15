@@ -28,32 +28,52 @@ export class HistorialViajesPage implements OnInit {
   async ngOnInit() {
   }
 
-  async ionViewWillEnter(){
+  async ionViewWillEnter() {
     const loading = await this.utilsSrv.loading();
     await loading.present();
     const user = await this.localStorageSrv.getUserFromSesion();
     this.subscribeToViajes(user.uid);
-    const viajes = await this.firebaseSrv.getDocumentsByPilotOrPassengerUid('Viajes', user.uid);
-    const { pilotResults, passengerResults } = viajes;
 
-    // Sort viajes by date in descending order
-    this.viajesPiloto = (pilotResults as Viaje[]).sort((a, b) => new Date(b.fechaSalida).getTime() - new Date(a.fechaSalida).getTime());
-    this.viajesPasajero = (passengerResults as Viaje[]).sort((a, b) => new Date(b.fechaSalida).getTime() - new Date(a.fechaSalida).getTime());
+    try {
+      const viajes = await this.firebaseSrv.getDocumentsByPilotOrPassengerUid('Viajes', user.uid);
+      const { pilotResults, passengerResults } = viajes;
 
-    // Store the last viaje
-    if (this.viajesPiloto.length > 0) {
-      await this.localStorageSrv.set('lastViaje', this.viajesPiloto[0]);
-    } else if (this.viajesPasajero.length > 0) {
-      await this.localStorageSrv.set('lastViaje', this.viajesPasajero[0]);
-    } else {
-      // Load the last viaje from local storage if no viajes are fetched
+      // Sort viajes by date in descending order
+      this.viajesPiloto = (pilotResults as Viaje[]).sort((a, b) => new Date(b.fechaSalida).getTime() - new Date(a.fechaSalida).getTime());
+      this.viajesPasajero = (passengerResults as Viaje[]).sort((a, b) => new Date(b.fechaSalida).getTime() - new Date(a.fechaSalida).getTime());
+
+      // Store the last viaje
+      if (this.viajesPiloto.length > 0) {
+        await this.localStorageSrv.set('lastViaje', this.viajesPiloto[0]);
+      } else if (this.viajesPasajero.length > 0) {
+        await this.localStorageSrv.set('lastViaje', this.viajesPasajero[0]);
+      } else {
+        // Load the last viaje from local storage if no viajes are fetched
+        const lastViaje = await this.localStorageSrv.get('lastViaje');
+        if (lastViaje) {
+          console.log('Loaded lastViaje from local storage:', lastViaje);
+          if (lastViaje.piloto.uid === user.uid) {
+            this.viajesPiloto = [lastViaje];
+          } else if (lastViaje.pasajeros.some(pasajero => pasajero.uid === user.uid)) {
+            this.viajesPasajero = [lastViaje];
+          }
+        } else {
+          console.log('No lastViaje found in local storage');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching viajes:', error);
+      // Load the last viaje from local storage if an error occurs
       const lastViaje = await this.localStorageSrv.get('lastViaje');
       if (lastViaje) {
+        console.log('Loaded lastViaje from local storage after error:', lastViaje);
         if (lastViaje.piloto.uid === user.uid) {
           this.viajesPiloto = [lastViaje];
         } else if (lastViaje.pasajeros.some(pasajero => pasajero.uid === user.uid)) {
           this.viajesPasajero = [lastViaje];
         }
+      } else {
+        console.log('No lastViaje found in local storage after error');
       }
     }
 
@@ -87,25 +107,51 @@ export class HistorialViajesPage implements OnInit {
 
   subscribeToViajes(uid: string) {
     this.firebaseSrv.getCollectionChanges<Viaje>('Viajes').subscribe({
-      next: (viajes: Viaje[]) => {
-        const pilotResults = viajes.filter(viaje => viaje.piloto.uid === uid);
-        const passengerResults = viajes.filter(viaje => viaje.pasajeros.some(pasajero => pasajero.uid === this.user.uid));
-
-        // Sort viajes by date in descending order
-        this.viajesPiloto = (pilotResults as Viaje[]).sort((a, b) => new Date(b.fechaSalida).getTime() - new Date(a.fechaSalida).getTime());
-        this.viajesPasajero = (passengerResults as Viaje[]).sort((a, b) => new Date(b.fechaSalida).getTime() - new Date(a.fechaSalida).getTime());
-
-        // Store the last viaje
-        if (this.viajesPiloto.length > 0) {
-          this.localStorageSrv.set('lastViaje', this.viajesPiloto[0]);
-        } else if (this.viajesPasajero.length > 0) {
-          this.localStorageSrv.set('lastViaje', this.viajesPasajero[0]);
-        }
+      next: async (viajes: Viaje[]) => {
+        await this.handleViajesUpdate(viajes, uid);
       },
       error: (error) => {
         console.error('Error fetching viajes:', error);
       }
     });
+  }
+
+  private async handleViajesUpdate(viajes: Viaje[], uid: string) {
+    const pilotResults = viajes.filter(viaje => viaje.piloto.uid === uid);
+    const passengerResults = viajes.filter(viaje => viaje.pasajeros.some(pasajero => pasajero.uid === this.user.uid));
+  
+    // Sort viajes by date in descending order
+    this.viajesPiloto = this.sortViajesByDate(pilotResults);
+    this.viajesPasajero = this.sortViajesByDate(passengerResults);
+  
+    // Store the last viaje
+    if (this.viajesPiloto.length > 0) {
+      await this.localStorageSrv.set('lastViaje', this.viajesPiloto[0]);
+    } else if (this.viajesPasajero.length > 0) {
+      await this.localStorageSrv.set('lastViaje', this.viajesPasajero[0]);
+    } else {
+      await this.loadLastViajeFromLocalStorage(uid);
+    }
+  }
+
+  private async loadLastViajeFromLocalStorage(uid: string) {
+    const lastViaje = await this.localStorageSrv.get('lastViaje');
+    if (lastViaje) {
+      console.log('Loaded lastViaje from local storage:', lastViaje);
+      if (lastViaje.piloto.uid === uid) {
+        this.viajesPiloto = [lastViaje];
+      } else if (lastViaje.pasajeros.some(pasajero => pasajero === uid)) {
+        this.viajesPasajero = [lastViaje];
+      } else {
+        console.log('No matching lastViaje found in local storage');
+      }
+    } else {
+      console.log('No lastViaje found in local storage');
+    }
+  }
+  
+  private sortViajesByDate(viajes: Viaje[]): Viaje[] {
+    return viajes.sort((a, b) => new Date(b.fechaSalida).getTime() - new Date(a.fechaSalida).getTime());
   }
 
   goToSolicitudes(viaje: Viaje) {
@@ -122,6 +168,6 @@ export class HistorialViajesPage implements OnInit {
     } else {
       return
     }
-    
+
   }
 }

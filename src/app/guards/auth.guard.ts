@@ -16,7 +16,6 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Promise<boolean | UrlTree> {
     const offlineSession = await this.storageSrv.get('sesion'); // Await the get method
-    console.log(offlineSession)
     if (offlineSession === null) {
       this.router.navigate(['/iniciar-sesion']);
       return false;
