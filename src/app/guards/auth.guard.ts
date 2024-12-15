@@ -11,15 +11,17 @@ export class AuthGuard implements CanActivate {
   constructor(private firebaseService: FirebaseService, private router: Router) {}
   storageSrv = inject(StorageService);
 
-
   async canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Promise<boolean | UrlTree> {
-    const offlineSession = this.storageSrv.get('sesion');
+    const offlineSession = await this.storageSrv.get('sesion'); // Await the get method
+    console.log(offlineSession)
     if (offlineSession === null) {
       this.router.navigate(['/iniciar-sesion']);
       return false;
+    } else if (offlineSession){
+      return true;
     }
     const isAuthenticated = await this.firebaseService.checkAndClearSession();
     if (!isAuthenticated) {
